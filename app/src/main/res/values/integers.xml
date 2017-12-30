@@ -1,0 +1,4 @@
+<resources>
+    <integer name="FIRE_STORY_THRESHOLD">400</integer>
+    <integer name="row_anim_duration_millis">300</integer>
+</resources>

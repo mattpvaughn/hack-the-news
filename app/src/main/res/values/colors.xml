@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#FFC107</color>
+    <color name="colorPrimaryDark">#FFA000</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="white">#FFFFFF</color>
+
+    <color name="text_high_priority">#3C3C3C</color>
+    <color name="text_low_priority">#C5C5C5</color>
+
+    <color name="divider_color">#E0E0E0E0</color>
+
+    <color name="fire_story_color">#F44336</color>
+</resources>

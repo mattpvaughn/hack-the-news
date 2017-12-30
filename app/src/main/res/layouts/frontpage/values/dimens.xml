@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="webview_bottom_bar_drawable_size">32dp</dimen>
+    <dimen name="webview_bottom_bar_drawable_spacing">16dp</dimen>
+    <dimen name="progress_bar_height">4dp</dimen>
+    <dimen name="collapsed_comment_counter_corner_radius">4dp</dimen>
+    <dimen name="collapsed_comment_counter_padding">4dp</dimen>
+</resources>

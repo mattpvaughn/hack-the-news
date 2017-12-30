@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.sothree.slidinguppanel.SlidingUpPanelLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/sliding_up_panel"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="top"
+    app:umanoDragView="@+id/dragView"
+    app:umanoPanelHeight="?android:attr/actionBarSize"
+    app:umanoScrollableView="@id/article_web_view">
+
+    <fragment
+        android:id="@+id/DiscussionFragment"
+        class="io.github.httpmattpvaughn.hnapp.details.DiscussionFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <fragment
+        android:id="@+id/ArticleWebViewFragment"
+        class="io.github.httpmattpvaughn.hnapp.details.ArticleFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</com.sothree.slidinguppanel.SlidingUpPanelLayout>

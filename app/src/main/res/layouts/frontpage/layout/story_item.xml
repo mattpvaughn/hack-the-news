@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/story_item"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/row_vertical_padding"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/row_vertical_padding">
+
+        <!-- TODO- move a lot of this to styles.xml for reuseability -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/text_item_separation"
+                android:fontFamily="sans-serif"
+                android:textColor="@color/text_low_priority"
+                android:textSize="16sp"
+                tools:text="111"/>
+
+            <TextView
+                android:id="@+id/author"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:textColor="@color/text_low_priority"
+                android:textSize="13sp"
+                tools:text="dhouston"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/title_bottom_margin"
+            android:textColor="@color/text_high_priority"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:text="My YC app: Dropbox - Throw away your USB drive"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/url"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="@dimen/text_item_separation"
+                android:drawableLeft="@drawable/ic_link_light_grey_24dp"
+                android:drawablePadding="4dp"
+                android:fontFamily="sans-serif-condensed"
+                android:gravity="center_vertical"
+                android:textColor="@color/text_low_priority"
+                android:textSize="13sp"
+                tools:text="(getdropbox.com)"/>
+
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="@dimen/text_item_separation"
+                android:layout_toRightOf="@id/url"
+                android:drawableLeft="@drawable/ic_time_light_grey_24dp"
+                android:drawablePadding="4dp"
+                android:fontFamily="sans-serif-condensed"
+                android:gravity="center_vertical"
+                android:textColor="@color/text_low_priority"
+                android:textSize="13sp"
+                tools:text="1hr"/>
+
+            <TextView
+                android:id="@+id/comments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:drawableLeft="@drawable/ic_comment_gold_24dp"
+                android:drawablePadding="4dp"
+                android:focusable="true"
+                android:fontFamily="sans-serif"
+                android:gravity="center_vertical"
+                android:textColor="@color/colorPrimary"
+                android:textSize="13sp"
+                tools:text="72"/>
+        </RelativeLayout>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/divider_size"
+        android:layout_gravity="bottom"
+        android:background="@color/divider_color"/>
+</LinearLayout>

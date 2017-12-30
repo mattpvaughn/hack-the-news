@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">HN App</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <!-- Front page -->
+    <string name="no_internet_connection">Failed to get stories. Check your internet connection.</string>
+
+    <string name="action_settings">Settings</string>
+</resources>
