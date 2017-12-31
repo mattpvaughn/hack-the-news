@@ -37,10 +37,7 @@ public class FrontPageFragment extends Fragment implements FrontPageContract.Vie
 
     private FrontPageContract.Presenter presenter;
     private StoryAdapter storyAdapter;
-    private boolean isViewCreated = false;
     private boolean isAttached = false;
-    private RecyclerView frontPageRecyclerView;
-    private LinearLayoutManager layoutManager;
 
     public void attachPresenter(final FrontPageContract.Presenter presenter) {
         this.presenter = presenter;
@@ -52,14 +49,12 @@ public class FrontPageFragment extends Fragment implements FrontPageContract.Vie
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.frontpage, container, false);
-
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         assert getActivity() == null && getActivity() instanceof AppCompatActivity;
-        this.isViewCreated = true;
 
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
@@ -73,8 +68,8 @@ public class FrontPageFragment extends Fragment implements FrontPageContract.Vie
         NavigationView navigationView = view.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        frontPageRecyclerView = view.findViewById(R.id.frontpage_recyclerview);
-        layoutManager = new LinearLayoutManager(getContext());
+        RecyclerView frontPageRecyclerView = view.findViewById(R.id.frontpage_recyclerview);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         frontPageRecyclerView.setLayoutManager(layoutManager);
         storyAdapter = new StoryAdapter(this, new ArrayList<Story>());
         frontPageRecyclerView.setAdapter(storyAdapter);
@@ -88,7 +83,7 @@ public class FrontPageFragment extends Fragment implements FrontPageContract.Vie
             };
             frontPageRecyclerView.addOnScrollListener(listener);
 
-            SwipeRefreshLayout swipeRefreshLayout = getView().findViewById(R.id.drag_refresh);
+            SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.drag_refresh);
             swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                 @Override
                 public void onRefresh() {

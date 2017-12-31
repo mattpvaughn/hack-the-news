@@ -2,16 +2,16 @@ package io.github.httpmattpvaughn.hnapp.details;
 
 import android.content.Context;
 import android.support.constraint.ConstraintLayout;
-import android.support.constraint.ConstraintSet;
 import android.support.v7.widget.RecyclerView;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.oissela.software.multilevelexpindlistview.MultiLevelExpIndListAdapter;
+
+import java.util.List;
 
 import io.github.httpmattpvaughn.hnapp.R;
 import io.github.httpmattpvaughn.hnapp.Util;
@@ -70,6 +70,21 @@ public class CommentAdapter extends MultiLevelExpIndListAdapter<CommentAdapter.V
         }
     }
 
+    public void addComments(List<Story> comments, Story parent) {
+        // if childcomment is root comment, add directly to adapter
+        Story firstChildComment = comments.get(0);
+        assert firstChildComment != null;
+        if (firstChildComment.parent == currentStory.id) {
+            addAll(comments);
+        } else {
+            int parentPosition = indexOf(parent);
+            for(Story childComment : comments) {
+                parent.addChild(childComment);
+            }
+            addAll(parentPosition + 1, comments);
+        }
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView collapsedCommentCounter;
         public ConstraintLayout root;
@@ -112,7 +127,7 @@ public class CommentAdapter extends MultiLevelExpIndListAdapter<CommentAdapter.V
             // Indent child comments depending on depth
             int depthMarkerWidth = (int) this.root.getContext().getResources().getDimension(R.dimen.depth_marker_width);
             ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) this.depthMarker.getLayoutParams();
-            if(comment.depth == 0) {
+            if (comment.depth == 0) {
                 params.width = 0;
             } else {
                 params.width = depthMarkerWidth;

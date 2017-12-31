@@ -15,7 +15,7 @@ import retrofit2.http.Path;
 
 public interface HackerNewsService {
 
-    public final static String BASE_URL = "https://hacker-news.firebaseio.com/v0/";
+    String BASE_URL = "https://hacker-news.firebaseio.com/v0/";
 
     @GET("item/{id}.json")
     Call<Story> item(
@@ -26,9 +26,10 @@ public interface HackerNewsService {
     Call<Integer[]> topStories();
 
 
-    public static final Retrofit retrofit = new Retrofit.Builder()
+    HackerNewsService retrofit = new Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
-            .build();
+            .build()
+            .create(HackerNewsService.class);
 
 }

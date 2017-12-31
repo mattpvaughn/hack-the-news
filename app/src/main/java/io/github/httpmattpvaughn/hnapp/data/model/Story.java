@@ -29,14 +29,6 @@ public class Story implements MultiLevelExpIndListAdapter.ExpIndData {
     private boolean isGroup;
     private int groupSize;
 
-    // Generic comment item constructor- used for debugging
-    public Story(String title, String by, String text) {
-        this.title = title;
-        this.by = by;
-        this.text = text;
-        this.type = "comment";
-    }
-
     @Override
     public String toString() {
         return "Story{" +

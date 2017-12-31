@@ -9,6 +9,8 @@ import android.view.MotionEvent;
 
 /**
  * Created by Matt Vaughn: http://mattpvaughn.github.io/
+ * Based on a response to this stackoverflow post:
+ * https://stackoverflow.com/questions/9650265/how-do-disable-paging-by-swiping-with-finger-in-viewpager-but-still-be-able-to-s
  */
 
 public class DisableableViewPager extends ViewPager {

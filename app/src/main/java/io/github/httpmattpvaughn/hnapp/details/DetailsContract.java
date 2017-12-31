@@ -1,5 +1,7 @@
 package io.github.httpmattpvaughn.hnapp.details;
 
+import java.util.List;
+
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
 
 /**
@@ -24,6 +26,8 @@ public interface DetailsContract {
 
         // Slides to the second page, does NOT slide down webview
         void openDiscussion(String url);
+
+        void addComments(List<Story> comments, Story comment);
     }
 
     // the *presenter* part of model-view-presenter

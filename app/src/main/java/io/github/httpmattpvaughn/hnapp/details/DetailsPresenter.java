@@ -2,8 +2,13 @@ package io.github.httpmattpvaughn.hnapp.details;
 
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.github.httpmattpvaughn.hnapp.MainActivityContract;
 import io.github.httpmattpvaughn.hnapp.data.HackerNewsService;
+import io.github.httpmattpvaughn.hnapp.data.StoryManager;
+import io.github.httpmattpvaughn.hnapp.data.StoryRepository;
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -17,6 +22,7 @@ public class DetailsPresenter implements DetailsContract.Presenter {
 
     private MainActivityContract.Presenter parentPresenter;
     private DetailsContract.View view;
+    private StoryManager storyManager;
 
     public DetailsPresenter(MainActivityContract.Presenter parentPresenter) {
         this.parentPresenter = parentPresenter;
@@ -55,41 +61,15 @@ public class DetailsPresenter implements DetailsContract.Presenter {
 
     // Recursively load all comments depth-first
     private void loadComments(final Story parentComment, final int depth) {
-        if (parentComment == null) {
-            return;
+        if(storyManager == null) {
+            storyManager = new StoryManager();
         }
-        if (parentComment.kids == null || parentComment.kids.length == 0) {
-            return;
-        }
-
-        for (int i = 0; i < parentComment.kids.length; i++) {
-            final int childCommentId = parentComment.kids[i];
-            Call<Story> call = HackerNewsService.retrofit
-                    .create(HackerNewsService.class)
-                    .item(childCommentId);
-            call.enqueue(new Callback<Story>() {
-                @Override
-                public void onResponse(Call<Story> call, Response<Story> response) {
-                    Story childComment = response.body();
-                    if (childComment != null) {
-                        childComment.depth = depth;
-                        if(view != null) {
-                            view.addComment(childComment, parentComment);
-                        }
-                        // Recursively load children comments of this comment
-                        if (childComment.kids != null && childComment.kids.length != 0) {
-                            loadComments(childComment, depth + 1);
-                        }
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Story> call, Throwable t) {
-                    view.printErrorMessage("Unable to retrieve comments. Check your internet connection.");
-                    Log.e("com.mattpvaughn.hnapp", "Unable to load comment with id " + childCommentId);
-                }
-            });
-        }
+        storyManager.getCommentsList(new StoryRepository.GetCommentsListCallback() {
+            @Override
+            public void onCommentsLoad(List<Story> comments, Story parent) {
+                view.addComments(comments, parent);
+            }
+        }, parentComment, 0, new ArrayList<Story>());
     }
 
     @Override

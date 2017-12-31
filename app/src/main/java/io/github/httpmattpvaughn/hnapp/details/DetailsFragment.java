@@ -27,6 +27,8 @@ import android.widget.Toast;
 
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
+import java.util.List;
+
 import io.github.httpmattpvaughn.hnapp.R;
 import io.github.httpmattpvaughn.hnapp.Util;
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
@@ -44,7 +46,6 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
     private SlidingUpPanelLayout slidingUpPanel;
     private RecyclerView commentsRecyclerView;
     private CommentAdapter commentAdapter;
-    private Story currentStory;
     private boolean isAttached = false;
     private boolean isViewCreated = false;
 
@@ -78,6 +79,7 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
             }
 
             private boolean shouldOverrideUrlLoading(final String url) {
+                webView.loadUrl(url);
                 return false; // Returning True means that application wants to leave the current WebView and handle the url itself, otherwise return false.
             }
         });
@@ -210,12 +212,16 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
         webviewBottomBar.setVisibility(View.INVISIBLE);
     }
 
+    @Override
+    public void addComments(List<Story> comments, Story parent) {
+        commentAdapter.addComments(comments, parent);
+    }
+
     // Set the preferred items from discussion page to match data stored in
     // item object
     @Override
     public void loadDiscussion(Story story) {
-        this.currentStory = story;
-        this.commentAdapter = new CommentAdapter(currentStory, this, new View.OnClickListener() {
+        this.commentAdapter = new CommentAdapter(story, this, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int position = commentsRecyclerView.getChildLayoutPosition(v);
@@ -244,9 +250,6 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
             TextView content = getView().findViewById(R.id.text_content);
             content.setVisibility(View.GONE);
         }
-
-//        this.commentAdapter = new CommentAdapter(this);
-//        this.commentsRecyclerView.setAdapter(this.commentAdapter);
     }
 
     @Override

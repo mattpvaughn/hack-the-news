@@ -30,16 +30,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
     private static final int DETAILS_PAGE = 1;
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        // TODO- horrifically ugly hack- but keeps the system from saving fragments
-        // when i specifically tell it not to
-        // super.onSaveInstanceState(outState); <-- original line
-        super.onSaveInstanceState(new Bundle());
+    protected void onStart() {
+        super.onStart();
+        this.frontPagePresenter.resetStoriesLoadedCount();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(createBundleNoFragmentRestore(savedInstanceState));
         setContentView(R.layout.activity_main);
 
         createPresenters();
@@ -51,8 +49,15 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
         if (!isDetailsPageOpen()) {
             pager.setSwipingEnabled(false);
         }
+    }
 
-        this.frontPagePresenter.resetStoriesLoadedCount();
+    // A somewhat hacky approach to keeping android from restoring fragments.
+    // from: https://stackoverflow.com/questions/15519214/prevent-fragment-recovery-in-android
+    private static Bundle createBundleNoFragmentRestore(Bundle bundle) {
+        if (bundle != null) {
+            bundle.remove("android:support:fragments");
+        }
+        return bundle;
     }
 
     @Override
@@ -63,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
         super.onDestroy();
     }
 
+    // Restores presenters which have been retained or creates new ones as necessary
     private void createPresenters() {
         Presenters presenters = (Presenters) getLastCustomNonConfigurationInstance();
         if (presenters != null) {
@@ -157,9 +163,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
     }
 
     @Override
-    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
-
-    @Override
     public void onPageSelected(int position) {
         if (position == TOP_STORIES) {
             pager.setSwipingEnabled(false);
@@ -169,8 +172,12 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
     }
 
     @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+
+    @Override
     public void onPageScrollStateChanged(int state) {}
 
+    // A POJO to hold presenters as they are retained in onRetainCustomNonConfigurationInstance
     public class Presenters {
         MainActivityContract.Presenter mainPresenter;
         DetailsContract.Presenter detailsPresenter;
