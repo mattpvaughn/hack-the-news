@@ -2,6 +2,7 @@ package io.github.httpmattpvaughn.hnapp;
 
 import android.content.Context;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.DisplayMetrics;
@@ -96,8 +97,19 @@ public class Util {
         return spanned;
     }
 
-    public static float dpToPixel(float dp, Context context) {
-        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        return dp * ((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+    // Sets the theme of an activity
+    public static void setTheme(Context context) {
+        String theme = PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(context.getString(R.string.theme_preference_key), null);
+        if(theme != null && !theme.equals("light")) {
+            switch (theme) {
+                case "dark":
+                    context.setTheme(R.style.DarkTheme);
+                    break;
+                case "black":
+                    context.setTheme(R.style.DarkTheme_Black);
+                    break;
+            }
+        }
     }
 }

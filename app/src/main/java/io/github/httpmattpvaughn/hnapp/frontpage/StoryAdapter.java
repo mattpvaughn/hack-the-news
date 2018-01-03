@@ -1,8 +1,11 @@
 package io.github.httpmattpvaughn.hnapp.frontpage;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -91,7 +94,10 @@ public class StoryAdapter extends RecyclerView.Adapter<StoryAdapter.ViewHolder> 
             if (story.score >= context.getResources().getInteger(R.integer.FIRE_STORY_THRESHOLD)) {
                 this.score.setTextColor(ContextCompat.getColor(context, R.color.fire_story_color));
             } else {
-                this.score.setTextColor(ContextCompat.getColor(context, R.color.text_low_priority));
+                TypedValue typedValue = new TypedValue();
+                Resources.Theme theme = context.getTheme();
+                theme.resolveAttribute(R.attr.rowTextColorPrimary, typedValue, true);
+                this.score.setTextColor(typedValue.data);
             }
             this.author.setText(story.by);
             this.url.setText(Util.beautifyUrl(story.url));

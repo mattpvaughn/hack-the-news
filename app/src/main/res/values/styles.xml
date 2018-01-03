@@ -3,22 +3,57 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimary">@color/light_theme_color_primary</item>
+        <item name="colorPrimaryDark">@color/light_theme_color_primary_dark</item>
+        <item name="colorAccent">@color/light_theme_color_primary</item>
         <item name="android:fitsSystemWindows">true</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="rowBackgroundColor">@color/light_theme_background_color</item>
+        <item name="rowTextColorPrimary">@color/light_theme_text_color_primary</item>
+        <item name="rowTextColorSecondary">@color/light_theme_text_color_secondary</item>
+        <item name="rowDividerColor">@color/light_theme_divider_color</item>
+        <item name="rowDrawableColor">@color/light_theme_drawable_color</item>
+        <item name="preferencesPaletteDrawable">@drawable/ic_palette_black_24dp</item>
+        <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
     </style>
 
-    <style name="DarkTheme" parent="AppTheme">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+    <style name="DarkTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="colorPrimary">@color/dark_theme_color_primary</item>
+        <item name="colorPrimaryDark">@color/dark_theme_color_primary_dark</item>
+        <item name="colorAccent">@color/dark_theme_color_primary</item>
+        <item name="rowBackgroundColor">@color/dark_theme_background_color</item>
+        <item name="rowTextColorPrimary">@color/dark_theme_text_color_primary</item>
+        <item name="rowTextColorSecondary">@color/dark_theme_text_color_secondary</item>
+        <item name="rowDividerColor">@color/dark_theme_divider_color</item>
+        <item name="rowDrawableColor">@color/dark_theme_drawable_color</item>
+        <item name="preferencesPaletteDrawable">@drawable/ic_palette_white_24dp</item>
+        <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
+    </style>
+
+
+    <style name="DarkTheme.Black">
+        <item name="android:windowBackground">@color/black_theme_background_color</item>
+        <item name="colorPrimaryDark">@color/black_theme_color_primary_dark</item>
+        <item name="rowBackgroundColor">@color/black_theme_background_color</item>
+    </style>
+
+    <style name="PreferenceTheme" parent="AppTheme">
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+        <item name="alertDialogTheme">@style/Theme.AppCompat.DayNight.Dialog.Alert</item>
+        <item name="windowActionBar">true</item>
+        <item name="android:fitsSystemWindows">false</item>
+        <item name="windowNoTitle">false</item>
     </style>
 
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+
+    <style name="WindowAnimationTransition">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
 
 </resources>

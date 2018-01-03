@@ -1,15 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#FFC107</color>
-    <color name="colorPrimaryDark">#FFA000</color>
-    <color name="colorAccent">#FF4081</color>
-
-    <color name="white">#FFFFFF</color>
-
-    <color name="text_high_priority">#3C3C3C</color>
-    <color name="text_low_priority">#C5C5C5</color>
-
-    <color name="divider_color">#E0E0E0E0</color>
-
+    <!-- Theme independent items -->
     <color name="fire_story_color">#F44336</color>
+
+    <!-- Dark theme -->
+    <color name="light_theme_color_primary">#FFC107</color>
+    <color name="light_theme_color_primary_dark">#FFA000</color>
+    <color name="light_theme_background_color">#fffafafa</color>
+    <color name="light_theme_text_color_primary">#de000000</color>
+    <color name="light_theme_text_color_secondary">#8a000000</color>
+    <color name="light_theme_divider_color">#E0E0E0</color>
+    <color name="light_theme_drawable_color">#8a000000</color>
+
+    <!-- Dark theme -->
+    <color name="dark_theme_color_primary">#455A64</color>
+    <color name="dark_theme_color_primary_dark">#2D3B42</color>
+    <color name="dark_theme_background_color">#222222</color>
+    <color name="dark_theme_text_color_primary">#ffffffff</color>
+    <color name="dark_theme_text_color_secondary">#b3ffffff</color>
+    <color name="dark_theme_divider_color">#5a5a5a</color>
+    <color name="dark_theme_drawable_color">#b3ffffff</color>
+
+    <!-- Black theme -->
+    <color name="black_theme_color_primary_dark">#000000</color>
+    <color name="black_theme_background_color">#000000</color>
+
+    <!-- Collapsible Comment counter -->
+    <color name="collapsible_comment_counter_text_color">#FFFFFF</color>
+
 </resources>

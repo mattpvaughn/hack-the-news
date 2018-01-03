@@ -1,7 +1,9 @@
 package io.github.httpmattpvaughn.hnapp;
 
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -20,7 +22,8 @@ import io.github.httpmattpvaughn.hnapp.frontpage.FrontPagePresenter;
  * sets/gets/interactions with the views
  */
 
-public class MainActivity extends AppCompatActivity implements MainActivityContract.View, ViewPager.OnPageChangeListener {
+public class MainActivity extends AppCompatActivity implements MainActivityContract.View,
+        ViewPager.OnPageChangeListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private DisableableViewPager pager;
     private MainActivityContract.Presenter mainActivityPresenter;
@@ -37,13 +40,21 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Util.setTheme(this);
         super.onCreate(createBundleNoFragmentRestore(savedInstanceState));
         setContentView(R.layout.activity_main);
 
         createPresenters();
 
+        setUpMainPagePager();
+    }
+
+    private void setUpMainPagePager() {
         pager = findViewById(R.id.view_pager);
-        pager.setAdapter(new MainPagerAdapter(getSupportFragmentManager(), frontPagePresenter, detailsPresenter));
+        pager.setAdapter(new MainPagerAdapter(getSupportFragmentManager(),
+                frontPagePresenter,
+                detailsPresenter
+        ));
         pager.addOnPageChangeListener(this);
 
         if (!isDetailsPageOpen()) {
@@ -84,6 +95,18 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
         mainActivityPresenter.attachView(this);
         mainActivityPresenter.addDetailsPresenter(detailsPresenter);
         mainActivityPresenter.addFrontPagePresenter(frontPagePresenter);
+    }
+
+    @Override
+    protected void onResume() {
+//        if(PreferenceManager.getDefaultSharedPreferences(this)
+//                .getBoolean(getString(R.string.use_dark_theme_key), false) != theme) {
+//            recreate();
+//        }
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(this);
+
+        super.onResume();
     }
 
     // Keep presenters from being destroyed on config change
@@ -163,6 +186,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
     }
 
     @Override
+    protected void onPause() {
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(this);
+        super.onPause();
+    }
+
+    @Override
     public void onPageSelected(int position) {
         if (position == TOP_STORIES) {
             pager.setSwipingEnabled(false);
@@ -176,6 +206,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
 
     @Override
     public void onPageScrollStateChanged(int state) {}
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if(key.equals(getString(R.string.theme_preference_key))) {
+            recreate();
+        }
+    }
 
     // A POJO to hold presenters as they are retained in onRetainCustomNonConfigurationInstance
     public class Presenters {

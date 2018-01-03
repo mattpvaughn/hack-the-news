@@ -28,7 +28,5 @@ public interface StoryRepository {
     void getStoryList(@NonNull GetStoryListCallback callback);
 
     void getCommentsList(@NonNull GetCommentsListCallback callback,
-                         Story parent,
-                         int depth,
-                         List<Story> comments);
+                         Story parent);
 }

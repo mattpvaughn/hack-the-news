@@ -21,13 +21,16 @@ public interface DetailsContract {
         // Prints an error message as a toast
         void printErrorMessage(String string);
 
-        // Adds a comment to the discussion view with the parent "parentComment"
-        void addComment(Story childComment, Story parentComment);
-
         // Slides to the second page, does NOT slide down webview
         void openDiscussion(String url);
 
-        void addComments(List<Story> comments, Story comment);
+        void addComments(List<Story> comments);
+
+        void showCommentsLoading();
+
+        void hideCommentsLoading();
+
+        void setArticleViewLock(boolean isLocked);
     }
 
     // the *presenter* part of model-view-presenter

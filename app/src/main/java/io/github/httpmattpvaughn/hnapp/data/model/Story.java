@@ -24,6 +24,9 @@ public class Story implements MultiLevelExpIndListAdapter.ExpIndData {
     public int parent;
     public int depth;
 
+    // "job", "story", "comment", "poll", or "pollopt"
+    private String TYPE_STORY = "story";
+
     // Not POJO stuff -> stuff for collapsable child view
     private List<Story> children;
     private boolean isGroup;
@@ -92,5 +95,9 @@ public class Story implements MultiLevelExpIndListAdapter.ExpIndData {
             this.children = new ArrayList<>();
         }
         this.children.add(story);
+    }
+
+    public boolean isStory() {
+        return type.equals(TYPE_STORY);
     }
 }

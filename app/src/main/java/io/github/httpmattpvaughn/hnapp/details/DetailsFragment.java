@@ -2,6 +2,9 @@ package io.github.httpmattpvaughn.hnapp.details;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -10,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -34,12 +38,15 @@ import io.github.httpmattpvaughn.hnapp.Util;
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
 import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 
+import static android.content.Context.CLIPBOARD_SERVICE;
+
 /**
  * Created by Matt Vaughn: http://mattpvaughn.github.io/
  */
 
 public class DetailsFragment extends Fragment implements DetailsContract.View,
-        BetterLinkMovementMethod.OnLinkClickListener {
+        BetterLinkMovementMethod.OnLinkClickListener,
+        BetterLinkMovementMethod.OnLinkLongClickListener {
 
     private DetailsContract.Presenter presenter;
     private WebView webView;
@@ -48,6 +55,7 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
     private CommentAdapter commentAdapter;
     private boolean isAttached = false;
     private boolean isViewCreated = false;
+    private Story currentStory;
 
     @Nullable
     @Override
@@ -60,11 +68,90 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         assert getActivity() == null && getActivity() instanceof AppCompatActivity;
-        this.webView = view.findViewById(R.id.article_web_view);
-        this.webView.getSettings().setJavaScriptEnabled(true);
-        this.webView.getSettings().setBuiltInZoomControls(true);
-        this.webView.getSettings().setDisplayZoomControls(false);
-        this.webView.setWebViewClient(new WebViewClient() {
+        webView = view.findViewById(R.id.article_web_view);
+        setUpWebView();
+
+        this.slidingUpPanel = view.findViewById(R.id.sliding_up_panel);
+        setupSlidingPanel();
+
+        this.commentsRecyclerView = view.findViewById(R.id.comment_recyclerview);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext()) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+
+            // Sort of a hack- stops "Inconsistency Detected" error which occasionally
+            // occurs after calling notifyItemInserted in adapter
+            @Override
+            public boolean supportsPredictiveItemAnimations() {
+                return false;
+            }
+        };
+        this.commentsRecyclerView.setLayoutManager(layoutManager);
+
+        this.isViewCreated = true;
+        if (isAttached && isViewCreated) {
+            addPresenterActions();
+        }
+
+//        SwipeRefreshLayout dragRefresh = view.findViewById(R.id.comments_drag_refresh);
+//        dragRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+//            @Override
+//            public void onRefresh() {
+//                loadDiscussion(currentStory);
+//            }
+//        });
+    }
+
+    private void setupSlidingPanel() {
+        this.slidingUpPanel.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+            // Offset is range [0-1f]  where 0 is collapsed, 1 is expanded
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+                // show webview_bottom_bar or discussion_toolbar depending on whats available
+                View discussionToolbar = slidingUpPanel.findViewById(R.id.discussion_toolbar);
+                View webviewBottomBar = slidingUpPanel.findViewById(R.id.webview_bottom_bar);
+                discussionToolbar.setVisibility(View.VISIBLE);
+                webviewBottomBar.setVisibility(View.VISIBLE);
+                discussionToolbar.setAlpha(1 - slideOffset);
+                webviewBottomBar.setAlpha(slideOffset);
+            }
+
+            @Override
+            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+                // show webview_bottom_bar or discussion_toolbar depending on whats available
+                View discussionToolbar = slidingUpPanel.findViewById(R.id.discussion_toolbar);
+                View webviewBottomBar = slidingUpPanel.findViewById(R.id.webview_bottom_bar);
+                if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
+                    // show webview bottom bar
+                    discussionToolbar.setVisibility(View.INVISIBLE);
+                    webviewBottomBar.setVisibility(View.VISIBLE);
+                } else if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+                    // show toolbar
+                    discussionToolbar.setVisibility(View.VISIBLE);
+                    webviewBottomBar.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+        View openInBrowser = slidingUpPanel.findViewById(R.id.open_in_browser);
+        updateWebViewState();
+        openInBrowser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent openLinkIntent = new Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse(webView.getUrl()));
+                getActivity().startActivity(openLinkIntent);
+            }
+        });
+    }
+
+    private void setUpWebView() {
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setBuiltInZoomControls(true);
+        webView.getSettings().setDisplayZoomControls(false);
+        webView.setWebViewClient(new WebViewClient() {
             @SuppressWarnings("deprecation")
             @Override
             public boolean shouldOverrideUrlLoading(WebView webView, String url) {
@@ -97,69 +184,6 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
             }
 
         });
-        this.slidingUpPanel = view.findViewById(R.id.sliding_up_panel);
-        this.slidingUpPanel.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
-            // Offset is range [0-1f]  where 0 is collapsed, 1 is expanded
-            @Override
-            public void onPanelSlide(View panel, float slideOffset) {
-                // show webview_bottom_bar or discussion_toolbar depending on whats available
-                View discussionToolbar = slidingUpPanel.findViewById(R.id.discussion_toolbar);
-                View webviewBottomBar = slidingUpPanel.findViewById(R.id.webview_bottom_bar);
-                discussionToolbar.setVisibility(View.VISIBLE);
-                webviewBottomBar.setVisibility(View.VISIBLE);
-                discussionToolbar.setAlpha(1 - slideOffset);
-                webviewBottomBar.setAlpha(slideOffset);
-            }
-
-            @Override
-            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
-                // show webview_bottom_bar or discussion_toolbar depending on whats available
-                View discussionToolbar = slidingUpPanel.findViewById(R.id.discussion_toolbar);
-                View webviewBottomBar = slidingUpPanel.findViewById(R.id.webview_bottom_bar);
-                if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
-                    // show webview bottom bar
-                    discussionToolbar.setVisibility(View.INVISIBLE);
-                    webviewBottomBar.setVisibility(View.VISIBLE);
-                } else if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-                    // show toolbar
-                    discussionToolbar.setVisibility(View.VISIBLE);
-                    webviewBottomBar.setVisibility(View.INVISIBLE);
-                }
-            }
-        });
-
-
-        View openInBrowser = slidingUpPanel.findViewById(R.id.open_in_browser);
-        updateWebViewState();
-        openInBrowser.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent openLinkIntent = new Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse(webView.getUrl()));
-                getActivity().startActivity(openLinkIntent);
-            }
-        });
-        this.commentsRecyclerView = view.findViewById(R.id.comment_recyclerview);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext()) {
-            @Override
-            public boolean canScrollVertically() {
-                return false;
-            }
-
-            // Sort of a hack- stops "Inconsistency Detected" error which occasionally
-            // occurs after calling notifyItemInserted in adapter
-            @Override
-            public boolean supportsPredictiveItemAnimations() {
-                return false;
-            }
-        };
-        this.commentsRecyclerView.setLayoutManager(layoutManager);
-
-        this.isViewCreated = true;
-        if(isAttached && isViewCreated) {
-            addPresenterActions();
-        }
     }
 
     public void attachPresenter(final DetailsContract.Presenter presenter) {
@@ -170,7 +194,7 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
     }
 
     private void addPresenterActions() {
-        if(isAttached && isViewCreated) {
+        if (isAttached && isViewCreated) {
             Toolbar discussionToolbar = slidingUpPanel.findViewById(R.id.discussion_toolbar);
             discussionToolbar.setNavigationIcon(ContextCompat.getDrawable(getContext(), R.drawable.ic_arrow_back_white_24dp));
             discussionToolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -213,18 +237,40 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
     }
 
     @Override
-    public void addComments(List<Story> comments, Story parent) {
-        commentAdapter.addComments(comments, parent);
+    public void addComments(List<Story> comments) {
+        commentAdapter.addAll(comments);
+    }
+
+    @Override
+    public void showCommentsLoading() {
+        if (getActivity() != null) {
+            ProgressBar progressBar = getActivity().findViewById(R.id.comments_progress);
+            progressBar.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void hideCommentsLoading() {
+        if (getActivity() != null) {
+            ProgressBar progressBar = getActivity().findViewById(R.id.comments_progress);
+            progressBar.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void setArticleViewLock(boolean isLocked) {
+        slidingUpPanel.setTouchEnabled(isLocked);
     }
 
     // Set the preferred items from discussion page to match data stored in
     // item object
     @Override
     public void loadDiscussion(Story story) {
-        this.commentAdapter = new CommentAdapter(story, this, new View.OnClickListener() {
+        this.currentStory = story;
+        this.commentAdapter = new CommentAdapter(story, this, this, new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                int position = commentsRecyclerView.getChildLayoutPosition(v);
+            public void onClick(View view) {
+                int position = commentsRecyclerView.getChildLayoutPosition(view);
                 commentAdapter.toggleGroup(position);
             }
         });
@@ -255,13 +301,6 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
     @Override
     public void printErrorMessage(String string) {
         Toast.makeText(getContext(), string, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void addComment(Story childComment, Story parentComment) {
-        if(commentAdapter != null) {
-            this.commentAdapter.addComment(childComment, parentComment);
-        }
     }
 
     // On link clicked
@@ -311,5 +350,51 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
             backButton.setAlpha(.5f);
             backButton.setOnClickListener(null);
         }
+    }
+
+    // action taken when a link in comments is longclicked
+    @Override
+    public boolean onLongClick(TextView textView, final String url) {
+        final CharSequence[] actions = new CharSequence[]{
+                "Open in browser",
+                "Share",
+                "Copy"
+        };
+        AlertDialog.OnClickListener listener =
+                new AlertDialog.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String action = (String) actions[which];
+                        switch (action) {
+                            case "Open in browser":
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                                startActivity(browserIntent);
+                                break;
+                            case "Share":
+                                Intent sendIntent = new Intent();
+                                sendIntent.setAction(Intent.ACTION_SEND);
+                                sendIntent.putExtra(Intent.EXTRA_TEXT, url);
+                                sendIntent.setType("text/plain");
+                                startActivity(sendIntent);
+                                break;
+                            case "Copy":
+                                ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(CLIPBOARD_SERVICE);
+                                ClipData clip = ClipData.newPlainText("URL", url);
+                                clipboard.setPrimaryClip(clip);
+                                Toast.makeText(getContext(), "Text copied to clipboard", Toast.LENGTH_SHORT).show();
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                };
+        new AlertDialog.Builder(getContext())
+                .setItems(actions, listener)
+                .setCancelable(true)
+                .setNegativeButton("Cancel", null)
+                .setTitle("Actions")
+                .create()
+                .show();
+        return false;
     }
 }

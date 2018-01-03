@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:key="dark_theme"
-        android:summary="Use a dark theme for easier night-time vision"
-        android:title="dark_mode"/>
+    <PreferenceCategory
+        android:title="Appearance">
+        <ListPreference
+            android:key="@string/theme_preference_key"
+            android:title="@string/theme_preference_title"
+            android:dialogTitle="@string/theme_preference_title"
+            android:entries="@array/themes_list_preference"
+            android:entryValues="@array/themes_key_preference" />
+    </PreferenceCategory>
 </PreferenceScreen>

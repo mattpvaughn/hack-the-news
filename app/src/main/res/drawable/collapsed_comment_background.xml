@@ -8,5 +8,5 @@
         android:right="@dimen/collapsed_comment_counter_padding"
         android:top="@dimen/collapsed_comment_counter_padding"/>
     <solid
-        android:color="@color/colorPrimary"/>
+        android:color="?attr/colorPrimary"/>
 </shape>

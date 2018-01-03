@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Item row (stories, comments) -->
+    <attr name="rowBackgroundColor" format="color"/>
+    <attr name="rowTextColorPrimary" format="color"/>
+    <attr name="rowTextColorSecondary" format="color"/>
+    <attr name="rowDrawableColor" format="color"/>
+    <attr name="rowDividerColor" format="color"/>
+
+    <!-- SettingsActivity-->
+    <attr name="preferencesPaletteDrawable" format="reference"/>
+</resources>

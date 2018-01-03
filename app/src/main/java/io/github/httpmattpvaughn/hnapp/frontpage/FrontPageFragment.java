@@ -1,5 +1,7 @@
 package io.github.httpmattpvaughn.hnapp.frontpage;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,6 +13,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ContextThemeWrapper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -24,8 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.github.httpmattpvaughn.hnapp.R;
-import io.github.httpmattpvaughn.hnapp.SettingsActivity;
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
+import io.github.httpmattpvaughn.hnapp.settings.SettingsActivity;
 
 /**
  * Created by Matt Vaughn: http://mattpvaughn.github.io/
@@ -47,7 +50,7 @@ public class FrontPageFragment extends Fragment implements FrontPageContract.Vie
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.frontpage, container, false);
     }
 

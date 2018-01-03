@@ -26,6 +26,7 @@ public class CommentAdapter extends MultiLevelExpIndListAdapter<CommentAdapter.V
 
     private final View.OnClickListener onClickListener;
     private final Story currentStory;
+    private final BetterLinkMovementMethod.OnLinkLongClickListener onLinkLongClickListener;
     private int[] colorDepthArr = new int[]{
             0xFFFFEB3B,
             0xFFFFC107,
@@ -37,9 +38,13 @@ public class CommentAdapter extends MultiLevelExpIndListAdapter<CommentAdapter.V
     };
     private BetterLinkMovementMethod.OnLinkClickListener onLinkClickListener;
 
-    public CommentAdapter(Story currentStory, BetterLinkMovementMethod.OnLinkClickListener onLinkClickListener, View.OnClickListener onClickListener) {
+    public CommentAdapter(Story currentStory,
+                          BetterLinkMovementMethod.OnLinkClickListener onLinkClickListener,
+                          BetterLinkMovementMethod.OnLinkLongClickListener onLinkLongClickListener,
+                          View.OnClickListener onClickListener) {
         this.currentStory = currentStory;
         this.onLinkClickListener = onLinkClickListener;
+        this.onLinkLongClickListener = onLinkLongClickListener;
         this.onClickListener = onClickListener;
     }
 
@@ -72,37 +77,24 @@ public class CommentAdapter extends MultiLevelExpIndListAdapter<CommentAdapter.V
 
     public void addComments(List<Story> comments, Story parent) {
         // if childcomment is root comment, add directly to adapter
-        Story firstChildComment = comments.get(0);
-        assert firstChildComment != null;
-        if (firstChildComment.parent == currentStory.id) {
-            addAll(comments);
-        } else {
-            int parentPosition = indexOf(parent);
-            for(Story childComment : comments) {
-                parent.addChild(childComment);
-            }
-            addAll(parentPosition + 1, comments);
-        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView collapsedCommentCounter;
-        public ConstraintLayout root;
+        public View root;
         public TextView author;
         public TextView time;
         public TextView text;
         public View depthMarker;
-        public View textContainer;
         public Story story;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            this.root = itemView.findViewById(R.id.story_item);
+            this.root = itemView.findViewById(R.id.comment_item);
             this.author = itemView.findViewById(R.id.author);
             this.time = itemView.findViewById(R.id.time);
             this.text = itemView.findViewById(R.id.text);
             this.depthMarker = itemView.findViewById(R.id.depth_marker);
-            this.textContainer = itemView.findViewById(R.id.comment_text_container);
             this.collapsedCommentCounter = itemView.findViewById(R.id.collapsed_comment_counter);
         }
 
@@ -119,7 +111,8 @@ public class CommentAdapter extends MultiLevelExpIndListAdapter<CommentAdapter.V
                 this.text.setText(Util.stringToHtml(comment.text));
                 BetterLinkMovementMethod
                         .linkify(Linkify.ALL, this.text)
-                        .setOnLinkClickListener(onLinkClickListener);
+                        .setOnLinkClickListener(onLinkClickListener)
+                        .setOnLinkLongClickListener(onLinkLongClickListener);
             } else {
                 this.text.setText("[Deleted]");
             }
@@ -138,7 +131,7 @@ public class CommentAdapter extends MultiLevelExpIndListAdapter<CommentAdapter.V
             // Set marker color depending on depth
             this.depthMarker.setBackgroundColor(colorDepthArr[comment.depth % colorDepthArr.length]);
 
-            // HACK! Use this until we figure out BetterLinkMovementMethod stealing onClicks from parents
+            // Hack alert! Use this until we figure out BetterLinkMovementMethod stealing onClicks from parents
             this.text.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

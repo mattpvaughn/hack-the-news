@@ -1,18 +1,11 @@
 package io.github.httpmattpvaughn.hnapp.details;
 
-import android.util.Log;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import io.github.httpmattpvaughn.hnapp.MainActivityContract;
-import io.github.httpmattpvaughn.hnapp.data.HackerNewsService;
 import io.github.httpmattpvaughn.hnapp.data.StoryManager;
 import io.github.httpmattpvaughn.hnapp.data.StoryRepository;
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * Created by Matt Vaughn: http://mattpvaughn.github.io/
@@ -29,18 +22,33 @@ public class DetailsPresenter implements DetailsContract.Presenter {
     }
 
     @Override
-    public void openArticle(Story story) {
+    public void openArticle(Story item) {
         // Show webview part of the detailsView
-        view.openArticle(story.url);
-        view.loadDiscussion(story);
-        loadComments(story, 0);
+        if(item.isStory()) {
+            view.openArticle(item.url);
+            view.loadDiscussion(item);
+            view.showCommentsLoading();
+            view.setArticleViewLock(false);
+            loadComments(item);
+        } else {
+            // the article is not a story (e.g. it's just a text post or something...)
+            openDiscussion(item);
+            view.setArticleViewLock(true);
+        }
     }
 
     @Override
-    public void openDiscussion(Story story) {
-        view.openDiscussion(story.url);
-        view.loadDiscussion(story);
-        loadComments(story, 0);
+    public void openDiscussion(Story item) {
+        if(!item.isStory()) {
+            // the article is not a story (e.g. it's just a text post or something...)
+            view.setArticleViewLock(true);
+        } else {
+            view.setArticleViewLock(false);
+        }
+        view.openDiscussion(item.url);
+        view.loadDiscussion(item);
+        view.showCommentsLoading();
+        loadComments(item);
     }
 
     @Override
@@ -60,16 +68,17 @@ public class DetailsPresenter implements DetailsContract.Presenter {
 
 
     // Recursively load all comments depth-first
-    private void loadComments(final Story parentComment, final int depth) {
-        if(storyManager == null) {
+    private void loadComments(final Story parentComment) {
+        if (storyManager == null) {
             storyManager = new StoryManager();
         }
         storyManager.getCommentsList(new StoryRepository.GetCommentsListCallback() {
             @Override
             public void onCommentsLoad(List<Story> comments, Story parent) {
-                view.addComments(comments, parent);
+                view.addComments(comments);
+                view.hideCommentsLoading();
             }
-        }, parentComment, 0, new ArrayList<Story>());
+        }, parentComment);
     }
 
     @Override

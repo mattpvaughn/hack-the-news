@@ -21,7 +21,7 @@
             style="@style/Widget.MaterialProgressBar.ProgressBar.Horizontal"
             android:layout_width="match_parent"
             android:layout_height="@dimen/progress_bar_height"
-            android:background="@color/colorPrimaryDark"
+            android:background="@color/light_theme_color_primary_dark"
             app:mpb_progressStyle="horizontal"
             app:mpb_useIntrinsicPadding="false"/>
 
@@ -29,7 +29,7 @@
             android:id="@+id/dragView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimary">
+            android:background="?attr/colorPrimary">
 
             <include layout="@layout/webview_bottom_bar"/>
 

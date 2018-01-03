@@ -1,8 +1,10 @@
 package io.github.httpmattpvaughn.hnapp.data;
 
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,46 +69,55 @@ public class StoryManager implements StoryRepository {
 
     @Override
     public void getCommentsList(@NonNull final GetCommentsListCallback callback,
-                                final Story parent,
-                                final int depth,
-                                @NonNull final List<Story> comments) {
-        if (comments.isEmpty()) {
-            comments.add(parent);
-        }
-        if (parent == null) {
-            return;
-        }
-        if (parent.kids == null || parent.kids.length == 0) {
-            return;
+                                final Story parent) {
+        FetchCommentsTask task = new FetchCommentsTask();
+        task.execute(new ArrayList<>(), parent, callback);
+    }
+
+    private static class FetchCommentsTask extends AsyncTask<Object, Object, List<Story>> {
+        private GetCommentsListCallback callback;
+        private Story parent;
+
+        @Override
+        protected void onPostExecute(List<Story> story) {
+            super.onPostExecute(story);
+            callback.onCommentsLoad(story, parent);
         }
 
+        @Override
+        protected List<Story> doInBackground(Object[] objects) {
+            List<Story> comments = (List<Story>) objects[0];
+            parent = (Story) objects[1];
+            callback = (GetCommentsListCallback) objects[2];
+            return getAllComments(parent, comments, 0);
+        }
+    }
+
+    // Synchronously get comments
+    public static List<Story> getAllComments(Story parent, List<Story> comments, int depth) {
+        if (parent.kids == null || parent.kids.length == 0) {
+            return comments;
+        }
         for (int i = 0; i < parent.kids.length; i++) {
             final int childCommentId = parent.kids[i];
-            Call<Story> call = HackerNewsService.retrofit.item(childCommentId);
-            call.enqueue(new Callback<Story>() {
-                @Override
-                public void onResponse(@NonNull Call<Story> call, @NonNull Response<Story> response) {
-                    Story childComment = response.body();
-                    if (childComment != null) {
-                        childComment.depth = depth;
-                        int parentPosition = comments.indexOf(parent);
-                        comments.add(parentPosition + 1, childComment);
-                        // Recursively load children comments of this comment
-                        if (childComment.kids != null && childComment.kids.length != 0) {
-                            getCommentsList(callback, childComment, depth + 1, comments);
-                        }
+            try {
+                Response response = HackerNewsService.retrofit.item(childCommentId).execute();
+                Story childComment = (Story) response.body();
+                if (childComment != null) {
+                    parent.addChild(childComment);
+                    childComment.depth = depth;
+                    int parentPosition = comments.indexOf(parent);
+                    comments.add(parentPosition + 1, childComment);
+                    // Recursively load children comments of this comment
+                    if (childComment.kids != null && childComment.kids.length != 0) {
+                        getAllComments(childComment, comments, depth + 1);
                     }
                 }
-
-                @Override
-                public void onFailure(Call<Story> call, Throwable t) {
-                    Log.e("HNapp", "Unable to load comment with id " + childCommentId);
-                }
-            });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        if(depth != 0) {
-            callback.onCommentsLoad(comments, parent);
-        }
+        return comments;
     }
 
     public void resetStoriesLoadedCount() {
