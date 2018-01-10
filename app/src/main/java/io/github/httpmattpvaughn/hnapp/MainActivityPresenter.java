@@ -1,5 +1,7 @@
 package io.github.httpmattpvaughn.hnapp;
 
+import java.util.List;
+
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
 import io.github.httpmattpvaughn.hnapp.details.DetailsContract;
 import io.github.httpmattpvaughn.hnapp.frontpage.FrontPageContract;
@@ -49,6 +51,14 @@ public class MainActivityPresenter implements MainActivityContract.Presenter {
     }
 
     @Override
+    public Story getCurrentStory() {
+        if (view.isDetailsPageOpen()) {
+            return detailsPresenter.getCurrentStory();
+        }
+        return null;
+    }
+
+    @Override
     public void attachView(MainActivityContract.View view) {
         this.view = view;
     }
@@ -56,5 +66,10 @@ public class MainActivityPresenter implements MainActivityContract.Presenter {
     @Override
     public void detachView() {
         this.view = null;
+    }
+
+    @Override
+    public void setComments(List<Story> comments) {
+        detailsPresenter.setComments(comments);
     }
 }

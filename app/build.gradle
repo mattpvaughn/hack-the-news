@@ -58,7 +58,7 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'com.squareup.retrofit2:converter-gson:2.3.0'
     compile 'com.google.code.gson:gson:2.8.2'
-    compile 'me.saket:better-link-movement-method:2'
+    compile 'com.klinkerapps:link_builder:1.6.1'
     compile 'me.zhanghai.android.materialprogressbar:library:1.4.2'
     implementation project(':multilevelexpindlistview')
 

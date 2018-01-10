@@ -1,7 +1,5 @@
 package io.github.httpmattpvaughn.hnapp.frontpage;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -13,7 +11,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.ContextThemeWrapper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -41,6 +38,7 @@ public class FrontPageFragment extends Fragment implements FrontPageContract.Vie
     private FrontPageContract.Presenter presenter;
     private StoryAdapter storyAdapter;
     private boolean isAttached = false;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     public void attachPresenter(final FrontPageContract.Presenter presenter) {
         this.presenter = presenter;
@@ -77,6 +75,10 @@ public class FrontPageFragment extends Fragment implements FrontPageContract.Vie
         storyAdapter = new StoryAdapter(this, new ArrayList<Story>());
         frontPageRecyclerView.setAdapter(storyAdapter);
 
+        swipeRefreshLayout = view.findViewById(R.id.drag_refresh);
+
+        setRefreshing(true);
+
         if (isAttached) {
             EndlessRecyclerViewScrollListener listener = new EndlessRecyclerViewScrollListener(layoutManager) {
                 @Override
@@ -86,7 +88,6 @@ public class FrontPageFragment extends Fragment implements FrontPageContract.Vie
             };
             frontPageRecyclerView.addOnScrollListener(listener);
 
-            SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.drag_refresh);
             swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                 @Override
                 public void onRefresh() {
@@ -113,7 +114,7 @@ public class FrontPageFragment extends Fragment implements FrontPageContract.Vie
             // close drawer
         }
 
-        DrawerLayout drawer = (DrawerLayout) getView().findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = getView().findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -134,10 +135,9 @@ public class FrontPageFragment extends Fragment implements FrontPageContract.Vie
     }
 
     @Override
-    public void hideRefreshLoader() {
-        SwipeRefreshLayout swipeRefreshLayout = getView().findViewById(R.id.drag_refresh);
+    public void setRefreshing(boolean isRefreshing) {
         if (swipeRefreshLayout != null) {
-            swipeRefreshLayout.setRefreshing(false);
+            swipeRefreshLayout.setRefreshing(isRefreshing);
         }
     }
 

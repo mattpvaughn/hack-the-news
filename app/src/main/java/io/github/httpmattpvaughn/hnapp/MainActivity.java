@@ -12,6 +12,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.gson.Gson;
+
+import io.github.httpmattpvaughn.hnapp.data.model.Story;
 import io.github.httpmattpvaughn.hnapp.details.DetailsContract;
 import io.github.httpmattpvaughn.hnapp.details.DetailsPresenter;
 import io.github.httpmattpvaughn.hnapp.frontpage.FrontPageContract;
@@ -25,12 +28,14 @@ import io.github.httpmattpvaughn.hnapp.frontpage.FrontPagePresenter;
 public class MainActivity extends AppCompatActivity implements MainActivityContract.View,
         ViewPager.OnPageChangeListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
+    private static final String CURRENT_STORY_KEY = "current_story";
     private DisableableViewPager pager;
     private MainActivityContract.Presenter mainActivityPresenter;
     private FrontPageContract.Presenter frontPagePresenter;
     private DetailsContract.Presenter detailsPresenter;
     private static final int TOP_STORIES = 0;
     private static final int DETAILS_PAGE = 1;
+    private Story currentStory;
 
     @Override
     protected void onStart() {
@@ -43,6 +48,16 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
         Util.setTheme(this);
         super.onCreate(createBundleNoFragmentRestore(savedInstanceState));
         setContentView(R.layout.activity_main);
+
+        if (savedInstanceState != null) {
+            System.out.println("savedInstanceState");
+            String json = savedInstanceState.getString(CURRENT_STORY_KEY);
+            if (json != null) {
+                System.out.println("json goot");
+                Gson gson = new Gson();
+                currentStory = gson.fromJson(json, Story.class);
+            }
+        }
 
         createPresenters();
 
@@ -79,6 +94,17 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
         super.onDestroy();
     }
 
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        // Save... current currentStory, (get from detailsPresenter)
+        Story story = detailsPresenter.getCurrentStory();
+        Gson gson = new Gson();
+        String json = gson.toJson(story);
+        outState.putString(CURRENT_STORY_KEY, json);
+        super.onSaveInstanceState(outState);
+    }
+
     // Restores presenters which have been retained or creates new ones as necessary
     private void createPresenters() {
         Presenters presenters = (Presenters) getLastCustomNonConfigurationInstance();
@@ -90,6 +116,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
             mainActivityPresenter = new MainActivityPresenter();
             detailsPresenter = new DetailsPresenter(mainActivityPresenter);
             frontPagePresenter = new FrontPagePresenter(mainActivityPresenter);
+
+            if (currentStory != null) {
+                detailsPresenter.setCurrentStory(currentStory);
+            }
         }
 
         mainActivityPresenter.attachView(this);
@@ -99,10 +129,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
 
     @Override
     protected void onResume() {
-//        if(PreferenceManager.getDefaultSharedPreferences(this)
-//                .getBoolean(getString(R.string.use_dark_theme_key), false) != theme) {
-//            recreate();
-//        }
         PreferenceManager.getDefaultSharedPreferences(this)
                 .registerOnSharedPreferenceChangeListener(this);
 
@@ -112,6 +138,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
     // Keep presenters from being destroyed on config change
     @Override
     public Object onRetainCustomNonConfigurationInstance() {
+        System.out.println("Retainer");
         return new Presenters(mainActivityPresenter, detailsPresenter, frontPagePresenter);
     }
 

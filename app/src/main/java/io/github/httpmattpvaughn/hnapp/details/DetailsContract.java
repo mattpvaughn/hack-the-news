@@ -24,13 +24,22 @@ public interface DetailsContract {
         // Slides to the second page, does NOT slide down webview
         void openDiscussion(String url);
 
+        // Sets a list of comments as the primary list in a recyclerview
         void addComments(List<Story> comments);
+
+        // Appends a list of comments to their parent
+        void addComments(List<Story> comments, Story parent);
+
+        // Appends a list of comments to their parent
+        void addComment(Story comment, Story parent);
 
         void showCommentsLoading();
 
         void hideCommentsLoading();
 
         void setArticleViewLock(boolean isLocked);
+
+        void addFakeComments(List<Story> comments, List<Story> parents);
     }
 
     // the *presenter* part of model-view-presenter
@@ -50,7 +59,19 @@ public interface DetailsContract {
         // Returns to the top stories page
         void closeDetailsPage();
 
+        // Returns the story currently open
+        Story getCurrentStory();
+
+        // Set the current story
+        void setCurrentStory(Story story);
+
+        // Load comments
+        void loadComments(Story story);
+
         // Remove reference to the view
         void detachView();
+
+        // Set comments in the discussion
+        void setComments(List<Story> comments);
     }
 }

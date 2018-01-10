@@ -28,26 +28,43 @@ public class Story implements MultiLevelExpIndListAdapter.ExpIndData {
     private String TYPE_STORY = "story";
 
     // Not POJO stuff -> stuff for collapsable child view
-    private List<Story> children;
+    private List<Story> children = new ArrayList<Story>();
     private boolean isGroup;
     private int groupSize;
 
     @Override
     public String toString() {
-        return "Story{" +
-                "title='" + title + '\'' +
-                ", by='" + by + '\'' +
-                ", url='" + url + '\'' +
-                ", type='" + type + '\'' +
-                ", text='" + text + '\'' +
-                ", kids=" + Arrays.toString(kids) +
-                ", id=" + id +
-                ", score=" + score +
-                ", time=" + time +
-                ", descendants=" + descendants +
-                ", parent=" + parent +
-                ", depth=" + depth +
-                '}';
+        return by;
+//        return "Story{" +
+//                "title='" + title + '\'' +
+//                ", by='" + by + '\'' +
+//                ", url='" + url + '\'' +
+//                ", type='" + type + '\'' +
+//                ", text='" + text + '\'' +
+//                ", kids=" + Arrays.toString(kids) +
+//                ", id=" + id +
+//                ", score=" + score +
+//                ", time=" + time +
+//                ", descendants=" + descendants +
+//                ", parent=" + parent +
+//                ", depth=" + depth +
+//                '}';
+    }
+
+    public Story copy() {
+        Story copy = new Story();
+        copy.id = this.id;
+        copy.by = this.by;
+        copy.url = this.url;
+        copy.type = this.type;
+        copy.text = this.text;
+        copy.kids = Arrays.copyOf(this.kids, this.kids.length);
+        copy.score = this.score;
+        copy.time = this.time;
+        copy.depth = this.depth;
+        copy.descendants = this.descendants;
+        copy.parent = this.parent;
+        return copy;
     }
 
     @Override
@@ -94,7 +111,7 @@ public class Story implements MultiLevelExpIndListAdapter.ExpIndData {
         if (children == null) {
             this.children = new ArrayList<>();
         }
-        this.children.add(story);
+        this.children.add(this.children.size(), story);
     }
 
     public boolean isStory() {

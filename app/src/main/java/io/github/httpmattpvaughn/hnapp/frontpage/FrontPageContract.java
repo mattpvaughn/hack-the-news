@@ -1,7 +1,5 @@
 package io.github.httpmattpvaughn.hnapp.frontpage;
 
-import android.view.View;
-
 import java.util.List;
 
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
@@ -23,7 +21,7 @@ public interface FrontPageContract {
         // Show toast containing error message
         void showErrorMessage(String string);
 
-        void hideRefreshLoader();
+        void setRefreshing(boolean isRefreshing);
     }
 
     // the *presenter* part of model-view-presenter

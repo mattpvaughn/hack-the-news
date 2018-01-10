@@ -31,15 +31,30 @@
             android:layout_height="wrap_content"/>
 
 
-        <me.zhanghai.android.materialprogressbar.MaterialProgressBar
+        <FrameLayout
             android:id="@+id/comments_progress"
-            style="@style/Widget.MaterialProgressBar.ProgressBar.Horizontal"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/progress_bar_height"
-            android:background="@color/light_theme_color_primary_dark"
-            android:indeterminate="true"
-            app:mpb_progressStyle="horizontal"
-            app:mpb_useIntrinsicPadding="false"/>
+            android:layout_height="match_parent">
+
+            <me.zhanghai.android.materialprogressbar.MaterialProgressBar
+                style="@style/Widget.MaterialProgressBar.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/progress_bar_height"
+                android:layout_gravity="top"
+                android:background="@color/light_theme_color_primary_dark"
+                android:indeterminate="true"
+                app:mpb_progressStyle="horizontal"
+                app:mpb_useIntrinsicPadding="false"/>
+
+            <TextView
+                android:textSize="13sp"
+                android:textColor="?attr/rowTextColorSecondary"
+                android:layout_marginTop="32dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal"
+                android:text="@string/loading_comments"/>
+        </FrameLayout>
 
     </LinearLayout>
 </android.support.v4.widget.NestedScrollView>

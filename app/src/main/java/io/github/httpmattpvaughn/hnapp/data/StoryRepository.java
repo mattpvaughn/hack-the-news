@@ -20,7 +20,15 @@ public interface StoryRepository {
     }
 
     interface GetCommentsListCallback {
+        void onCommentsLoaded(List<Story> comments, Story parent);
+    }
+
+    interface GetCommentsCallback {
         void onCommentsLoad(List<Story> comments, Story parent);
+    }
+
+    interface LoadCommentsIndividuallyCallback {
+        void onCommentsLoad(List<Story> comments, List<Story> parents);
     }
 
     void getStoryIdArray(@NonNull GetStoryIdsCallback callback);
@@ -29,4 +37,8 @@ public interface StoryRepository {
 
     void getCommentsList(@NonNull GetCommentsListCallback callback,
                          Story parent);
+
+    void loadCommentsIndividually(@NonNull LoadCommentsIndividuallyCallback callback,
+                                  Story parent,
+                                  int depth);
 }

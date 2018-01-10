@@ -2,4 +2,5 @@
 <resources>
     <string name="theme_preference_key">theme</string>
     <string name="theme_preference_title">Theme</string>
+    <string name="loading_comments">Loading comments…</string>
 </resources>

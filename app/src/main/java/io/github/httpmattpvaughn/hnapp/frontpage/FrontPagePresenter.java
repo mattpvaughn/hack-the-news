@@ -16,7 +16,6 @@ public class FrontPagePresenter implements FrontPageContract.Presenter {
     private MainActivityContract.Presenter parentPresenter;
     private FrontPageContract.View view;
     private StoryManager storyManager;
-    private boolean isRefresh = false;
     private boolean isStoryListLoaded = false;
 
     public FrontPagePresenter(MainActivityContract.Presenter parentPresenter) {
@@ -38,10 +37,23 @@ public class FrontPagePresenter implements FrontPageContract.Presenter {
                     storyManager.getStoryList(new StoryRepository.GetStoryListCallback() {
                         @Override
                         public void onPostsLoaded(List<Story> stories) {
-                            if(isRefresh) {
-                                view.hideRefreshLoader();
+                            if (stories == null || stories.isEmpty()) {
+                                view.showErrorMessage("Sorry! HN API only provides up to 500 stories");
+                                return;
                             }
+                            view.setRefreshing(false);
                             view.addStories(stories);
+                            for (Story parents : stories) {
+                                storyManager.getCommentsList(new StoryRepository.GetCommentsListCallback() {
+                                    @Override
+                                    public void onCommentsLoaded(List<Story> comments, Story parent) {
+                                        System.out.println("Cached " + parent.title);
+                                        if (parent.equals(parentPresenter.getCurrentStory())) {
+                                            parentPresenter.setComments(comments);
+                                        }
+                                    }
+                                }, parents);
+                            }
                         }
                     });
                 }
@@ -50,9 +62,7 @@ public class FrontPagePresenter implements FrontPageContract.Presenter {
             storyManager.getStoryList(new StoryRepository.GetStoryListCallback() {
                 @Override
                 public void onPostsLoaded(List<Story> stories) {
-                    if(isRefresh) {
-                        view.hideRefreshLoader();
-                    }
+                    view.setRefreshing(false);
                     view.addStories(stories);
                 }
             });
@@ -62,7 +72,6 @@ public class FrontPagePresenter implements FrontPageContract.Presenter {
 
     @Override
     public void reloadStories() {
-        isRefresh = true;
         view.clearStories();
         resetStoriesLoadedCount();
         loadStories();

@@ -1,10 +1,10 @@
 package io.github.httpmattpvaughn.hnapp;
 
+import java.util.List;
+
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
 import io.github.httpmattpvaughn.hnapp.details.DetailsContract;
-import io.github.httpmattpvaughn.hnapp.details.DetailsPresenter;
 import io.github.httpmattpvaughn.hnapp.frontpage.FrontPageContract;
-import io.github.httpmattpvaughn.hnapp.frontpage.FrontPagePresenter;
 
 /**
  * Created by Matt Vaughn: http://mattpvaughn.github.io/
@@ -41,10 +41,17 @@ public interface MainActivityContract {
         // Returns to the top stories page
         void closeDetailsPage();
 
+        // Get the currently opened story- returns null if no stories have been
+        // opened or if app is open to front page
+        Story getCurrentStory();
+
         // Attaches to a view
         void attachView(MainActivityContract.View view);
 
         // Remove reference to the view
         void detachView();
+
+        // Sets the comments in the details view
+        void setComments(List<Story> comments);
     }
 }

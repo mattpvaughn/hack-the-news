@@ -47,6 +47,10 @@ public class StoryManager implements StoryRepository {
     public void getStoryList(@NonNull final GetStoryListCallback callback) {
         final List<Story> storyList = new ArrayList<>();
         for (int i = storiesLoaded; i < storiesLoaded + STORIES_PER_PAGE; i++) {
+            if (i > storyIdArr.length) {
+                callback.onPostsLoaded(new ArrayList<Story>());
+                return;
+            }
             Call<Story> call = HackerNewsService.retrofit.item(storyIdArr[i]);
             call.enqueue(new Callback<Story>() {
                 @Override
@@ -70,8 +74,110 @@ public class StoryManager implements StoryRepository {
     @Override
     public void getCommentsList(@NonNull final GetCommentsListCallback callback,
                                 final Story parent) {
-        FetchCommentsTask task = new FetchCommentsTask();
-        task.execute(new ArrayList<>(), parent, callback);
+        // check in cache for comments list
+        List<Story> thread = CommentsCache.getThread(parent.id);
+        if (thread != null) {
+            callback.onCommentsLoaded(thread, parent);
+        } else {
+            FetchCommentsTask task = new FetchCommentsTask();
+            task.execute(new ArrayList<>(), parent, callback);
+        }
+    }
+
+    // Call callback in depth levels- load root comments, then their children, then their children's children, etc.
+    public void getFakeCommentsIndividually(LoadCommentsIndividuallyCallback callback) {
+        List<Story> stories = getFakeStories();
+
+        int FAKE_CHILDREN_PER_LEVEL = 100;
+        int LEVELS = 3;
+
+        for (int j = 0; j < LEVELS; j++) {
+            List<Story> childStories = new ArrayList<>();
+            List<Story> matchingParents = new ArrayList<>();
+            for (int i = 1; i <= FAKE_CHILDREN_PER_LEVEL; i++) {
+                Story child = stories.get(j * FAKE_CHILDREN_PER_LEVEL + i);
+                int parentPosition = Math.max(j - 1, 0) * FAKE_CHILDREN_PER_LEVEL + i;
+                Story parent;
+                if (parentPosition == 0) {
+                    parent = stories.get(0);
+                } else {
+                    parent = stories.get(parentPosition);
+                }
+                childStories.add(child);
+                matchingParents.add(parent);
+            }
+            callback.onCommentsLoad(childStories, matchingParents);
+        }
+    }
+
+    private static List<Story> getFakeStories() {
+        List<Story> stories = new ArrayList<>();
+
+        int FAKE_CHILDREN_PER_LEVEL = 100;
+        int LEVELS = 3;
+
+        Story root = new Story();
+        root.id = 0;
+        root.kids = new int[FAKE_CHILDREN_PER_LEVEL];
+
+        for (int i = 0; i < FAKE_CHILDREN_PER_LEVEL; i++) {
+            root.kids[i] = i + 1;
+        }
+
+        stories.add(root); // index 0
+
+        for (int j = 0; j < LEVELS; j++) {
+            for (int i = 1; i <= FAKE_CHILDREN_PER_LEVEL; i++) {
+                Story newStory = new Story();
+                newStory.id = j * FAKE_CHILDREN_PER_LEVEL + i;
+                newStory.parent = Math.max(j - 1, 0) * FAKE_CHILDREN_PER_LEVEL + i;
+                newStory.kids = new int[]{(j + 1) * FAKE_CHILDREN_PER_LEVEL + i};
+                newStory.by = "level " + (j + 1);
+                newStory.depth = j + 1;
+                stories.add(newStory); // indices 1-900
+            }
+        }
+
+        return stories;
+    }
+
+    @Override
+    public void loadCommentsIndividually(@NonNull final LoadCommentsIndividuallyCallback callback,
+                                         final Story parent,
+                                         final int depth) {
+        final List<Story> comments = new ArrayList<>();
+        if (parent == null) {
+            return;
+        }
+        if (parent.kids == null || parent.kids.length == 0) {
+            return;
+        }
+        for (int i = 0; i < parent.kids.length; i++) {
+            final int childCommentId = parent.kids[i];
+            Call<Story> call = HackerNewsService.retrofit.item(childCommentId);
+            call.enqueue(new Callback<Story>() {
+                @Override
+                public void onResponse(@NonNull Call<Story> call, @NonNull Response<Story> response) {
+                    Story childComment = response.body();
+                    if (childComment != null) {
+                        childComment.depth = depth;
+                        int parentPosition = comments.indexOf(parent);
+                        comments.add(parentPosition + 1, childComment);
+                        // Recursively load children comments of this comment
+                        loadCommentsIndividually(callback, childComment, depth + 1);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Story> call, Throwable t) {
+                    Log.e("HNapp", "Unable to load comment with id " + childCommentId);
+                }
+            });
+        }
+        // depth > 0 so we don't include the root story (the post) as a comment
+        if (depth > 0) {
+//            callback.onCommentsLoaded(comments, parent);
+        }
     }
 
     private static class FetchCommentsTask extends AsyncTask<Object, Object, List<Story>> {
@@ -79,9 +185,11 @@ public class StoryManager implements StoryRepository {
         private Story parent;
 
         @Override
-        protected void onPostExecute(List<Story> story) {
-            super.onPostExecute(story);
-            callback.onCommentsLoad(story, parent);
+        protected void onPostExecute(List<Story> stories) {
+            super.onPostExecute(stories);
+            System.out.println("Stories loaded " + stories);
+            callback.onCommentsLoaded(stories, parent);
+            CommentsCache.addThread(stories, parent.id);
         }
 
         @Override
@@ -91,6 +199,7 @@ public class StoryManager implements StoryRepository {
             callback = (GetCommentsListCallback) objects[2];
             return getAllComments(parent, comments, 0);
         }
+
     }
 
     // Synchronously get comments
@@ -124,5 +233,40 @@ public class StoryManager implements StoryRepository {
         this.storiesLoaded = 0;
     }
 
+    private static class CommentsCache {
+        private final static int THREADS_TO_CACHE = 200;
+        private static List<List<Story>> cache = new ArrayList<>();
+        private static List<Integer> parentIds = new ArrayList<>();
+
+        static void addThread(List<Story> storyList, int parentId) {
+            if (cache.size() >= THREADS_TO_CACHE) {
+                // remove last item from cache if no space
+                cache.remove(cache.size() - 1);
+                parentIds.remove(cache.size() - 1);
+            }
+            parentIds.add(parentId);
+            cache.add(storyList);
+        }
+
+        static List<Story> getThread(int parentId) {
+            int position = parentIds.indexOf(parentId);
+            if (position < 0) {
+                return null;
+            }
+            List<Story> thread = cache.get(position);
+
+            // bump the thread up to the top of the list
+            cache.remove(thread);
+            cache.add(thread);
+            parentIds.remove(position);
+            parentIds.add(parentId);
+
+            System.out.println("Comment gotten from cache!");
+
+            return thread;
+        }
+
+
+    }
 
 }

@@ -2,13 +2,14 @@ package io.github.httpmattpvaughn.hnapp.frontpage;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.support.annotation.ColorInt;
+import android.graphics.PorterDuff;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -66,6 +67,7 @@ public class StoryAdapter extends RecyclerView.Adapter<StoryAdapter.ViewHolder> 
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
+        public ImageView urlDrawable;
         public View root;
         public TextView title;
         public TextView author;
@@ -84,20 +86,28 @@ public class StoryAdapter extends RecyclerView.Adapter<StoryAdapter.ViewHolder> 
             this.url = itemView.findViewById(R.id.url);
             this.time = itemView.findViewById(R.id.time);
             this.comments = itemView.findViewById(R.id.comments);
+            this.urlDrawable = itemView.findViewById(R.id.url_drawable);
         }
 
         // Do it this way so we have an easy way to handle different types
         public void setStory(final Story story) {
+            Context context = this.root.getContext();
+            Resources.Theme theme = context.getTheme();
             this.story = story;
             this.score.setText(String.valueOf(story.score));
-            Context context = this.root.getContext();
             if (story.score >= context.getResources().getInteger(R.integer.FIRE_STORY_THRESHOLD)) {
                 this.score.setTextColor(ContextCompat.getColor(context, R.color.fire_story_color));
             } else {
                 TypedValue typedValue = new TypedValue();
-                Resources.Theme theme = context.getTheme();
                 theme.resolveAttribute(R.attr.rowTextColorPrimary, typedValue, true);
                 this.score.setTextColor(typedValue.data);
+            }
+            // Don't show link icon is story is not a link
+            if (story.isStory() && url == null) {
+                this.urlDrawable.setImageResource(R.drawable.ic_text_fields_black_24dp);
+                TypedValue typedValue = new TypedValue();
+                theme.resolveAttribute(R.attr.rowDrawableColor, typedValue, true);
+                this.urlDrawable.getDrawable().setColorFilter(typedValue.data, PorterDuff.Mode.MULTIPLY);
             }
             this.author.setText(story.by);
             this.url.setText(Util.beautifyUrl(story.url));

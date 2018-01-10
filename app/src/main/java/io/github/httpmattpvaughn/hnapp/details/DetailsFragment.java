@@ -29,6 +29,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.klinker.android.link_builder.Link;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.List;
@@ -36,7 +37,6 @@ import java.util.List;
 import io.github.httpmattpvaughn.hnapp.R;
 import io.github.httpmattpvaughn.hnapp.Util;
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
-import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 
 import static android.content.Context.CLIPBOARD_SERVICE;
 
@@ -45,8 +45,8 @@ import static android.content.Context.CLIPBOARD_SERVICE;
  */
 
 public class DetailsFragment extends Fragment implements DetailsContract.View,
-        BetterLinkMovementMethod.OnLinkClickListener,
-        BetterLinkMovementMethod.OnLinkLongClickListener {
+        Link.OnClickListener,
+        Link.OnLongClickListener {
 
     private DetailsContract.Presenter presenter;
     private WebView webView;
@@ -81,12 +81,6 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
                 return false;
             }
 
-            // Sort of a hack- stops "Inconsistency Detected" error which occasionally
-            // occurs after calling notifyItemInserted in adapter
-            @Override
-            public boolean supportsPredictiveItemAnimations() {
-                return false;
-            }
         };
         this.commentsRecyclerView.setLayoutManager(layoutManager);
 
@@ -94,14 +88,6 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
         if (isAttached && isViewCreated) {
             addPresenterActions();
         }
-
-//        SwipeRefreshLayout dragRefresh = view.findViewById(R.id.comments_drag_refresh);
-//        dragRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-//            @Override
-//            public void onRefresh() {
-//                loadDiscussion(currentStory);
-//            }
-//        });
     }
 
     private void setupSlidingPanel() {
@@ -135,7 +121,7 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
             }
         });
         View openInBrowser = slidingUpPanel.findViewById(R.id.open_in_browser);
-        updateWebViewState();
+        updateWebViewControls();
         openInBrowser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -167,6 +153,7 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
 
             private boolean shouldOverrideUrlLoading(final String url) {
                 webView.loadUrl(url);
+                updateWebViewControls();
                 return false; // Returning True means that application wants to leave the current WebView and handle the url itself, otherwise return false.
             }
         });
@@ -205,6 +192,11 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
             });
 
             this.presenter.addView(this);
+
+            if (presenter.getCurrentStory() != null) {
+                System.out.println("Presenter stuff");
+                presenter.openDiscussion(presenter.getCurrentStory());
+            }
         }
     }
 
@@ -214,7 +206,7 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
             slidingUpPanel.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
         this.webView.loadUrl(url);
-        updateWebViewState();
+        updateWebViewControls();
 
         View discussionToolbar = slidingUpPanel.findViewById(R.id.discussion_toolbar);
         View webviewBottomBar = slidingUpPanel.findViewById(R.id.webview_bottom_bar);
@@ -228,7 +220,7 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
             slidingUpPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         }
         this.webView.loadUrl(url);
-        updateWebViewState();
+        updateWebViewControls();
 
         View discussionToolbar = slidingUpPanel.findViewById(R.id.discussion_toolbar);
         View webviewBottomBar = slidingUpPanel.findViewById(R.id.webview_bottom_bar);
@@ -239,41 +231,66 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
     @Override
     public void addComments(List<Story> comments) {
         commentAdapter.addAll(comments);
+        hideCommentsLoading();
+    }
+
+    @Override
+    public void addComments(List<Story> comments, Story parent) {
+        commentAdapter.addAll(comments);
+    }
+
+    @Override
+    public void addComment(Story comment, Story parent) {
+//        ((UncollapsibleCommentAdapter) commentAdapter).addComment(comment, parent);
     }
 
     @Override
     public void showCommentsLoading() {
         if (getActivity() != null) {
-            ProgressBar progressBar = getActivity().findViewById(R.id.comments_progress);
-            progressBar.setVisibility(View.VISIBLE);
+            View commentsProgress = getActivity().findViewById(R.id.comments_progress);
+            commentsProgress.setVisibility(View.VISIBLE);
         }
     }
 
     @Override
     public void hideCommentsLoading() {
         if (getActivity() != null) {
-            ProgressBar progressBar = getActivity().findViewById(R.id.comments_progress);
-            progressBar.setVisibility(View.GONE);
+            View commentsProgress = getActivity().findViewById(R.id.comments_progress);
+            commentsProgress.setVisibility(View.GONE);
         }
     }
 
     @Override
     public void setArticleViewLock(boolean isLocked) {
-        slidingUpPanel.setTouchEnabled(isLocked);
+        // Touch is ENABLED when article is UNLOCKED
+        slidingUpPanel.setTouchEnabled(!isLocked);
     }
+
+    @Override
+    public void addFakeComments(List<Story> comments, List<Story> parents) {
+//        ((UncollapsibleCommentAdapter)commentAdapter).setComments(comments, parents);
+    }
+
 
     // Set the preferred items from discussion page to match data stored in
     // item object
     @Override
     public void loadDiscussion(Story story) {
         this.currentStory = story;
-        this.commentAdapter = new CommentAdapter(story, this, this, new View.OnClickListener() {
+        this.commentAdapter = new CommentAdapter(this, this, new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 int position = commentsRecyclerView.getChildLayoutPosition(view);
                 commentAdapter.toggleGroup(position);
             }
         });
+//        Loading in fake comments for debugging- will eventually refactor to an if(DEBUG)
+//        this.commentAdapter = new UncollapsibleCommentAdapter();
+//        List<Story> data = new ArrayList<Story>();
+//        int FAKE_CHILDREN_PER_LEVEL = 300;
+//        for(int i = 0; i < 300; i++) {
+//            data.add(new Story());
+//        }
         this.commentsRecyclerView.setAdapter(commentAdapter);
         TextView score = getView().findViewById(R.id.score);
         score.setText(String.valueOf(story.score));
@@ -303,15 +320,7 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
         Toast.makeText(getContext(), string, Toast.LENGTH_SHORT).show();
     }
 
-    // On link clicked
-    @Override
-    public boolean onClick(TextView textView, String url) {
-        presenter.openLink(url);
-        // return true so parent gets event as well
-        return false;
-    }
-
-    private void updateWebViewState() {
+    private void updateWebViewControls() {
         enableWebViewBackButton(webView.canGoBack());
         enableWebViewForwardsButton(webView.canGoForward());
     }
@@ -324,7 +333,7 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
                 @Override
                 public void onClick(View view) {
                     webView.goForward();
-                    updateWebViewState();
+                    updateWebViewControls();
                 }
             });
         } else {
@@ -342,7 +351,7 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
                 @Override
                 public void onClick(View view) {
                     webView.goBack();
-                    updateWebViewState();
+                    updateWebViewControls();
                 }
             });
         } else {
@@ -352,9 +361,18 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
         }
     }
 
-    // action taken when a link in comments is longclicked
     @Override
-    public boolean onLongClick(TextView textView, final String url) {
+    public void onClick(String clickedText) {
+        presenter.openLink(clickedText);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onLongClick(final String clickedText) {
         final CharSequence[] actions = new CharSequence[]{
                 "Open in browser",
                 "Share",
@@ -367,19 +385,19 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
                         String action = (String) actions[which];
                         switch (action) {
                             case "Open in browser":
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(clickedText));
                                 startActivity(browserIntent);
                                 break;
                             case "Share":
                                 Intent sendIntent = new Intent();
                                 sendIntent.setAction(Intent.ACTION_SEND);
-                                sendIntent.putExtra(Intent.EXTRA_TEXT, url);
+                                sendIntent.putExtra(Intent.EXTRA_TEXT, clickedText);
                                 sendIntent.setType("text/plain");
                                 startActivity(sendIntent);
                                 break;
                             case "Copy":
                                 ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(CLIPBOARD_SERVICE);
-                                ClipData clip = ClipData.newPlainText("URL", url);
+                                ClipData clip = ClipData.newPlainText("URL", clickedText);
                                 clipboard.setPrimaryClip(clip);
                                 Toast.makeText(getContext(), "Text copied to clipboard", Toast.LENGTH_SHORT).show();
                                 break;
@@ -395,6 +413,5 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
                 .setTitle("Actions")
                 .create()
                 .show();
-        return false;
     }
 }
