@@ -3,7 +3,7 @@ package io.github.httpmattpvaughn.hnapp.frontpage;
 import java.util.List;
 
 import io.github.httpmattpvaughn.hnapp.MainActivityContract;
-import io.github.httpmattpvaughn.hnapp.data.StoryManager;
+import io.github.httpmattpvaughn.hnapp.data.Injection;
 import io.github.httpmattpvaughn.hnapp.data.StoryRepository;
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
 
@@ -15,7 +15,7 @@ public class FrontPagePresenter implements FrontPageContract.Presenter {
 
     private MainActivityContract.Presenter parentPresenter;
     private FrontPageContract.View view;
-    private StoryManager storyManager;
+    private StoryRepository storyRepository;
     private boolean isStoryListLoaded = false;
 
     public FrontPagePresenter(MainActivityContract.Presenter parentPresenter) {
@@ -25,29 +25,35 @@ public class FrontPagePresenter implements FrontPageContract.Presenter {
     @Override
     public void loadStories() {
         System.out.println("Loading stories");
-        if (storyManager == null) {
-            storyManager = new StoryManager();
+        if (storyRepository == null) {
+            storyRepository = Injection.provideStoryRepository();
         }
         if (!isStoryListLoaded) {
-            storyManager.getStoryIdArray(new StoryRepository.GetStoryIdsCallback() {
+            storyRepository.getStoryIdArray(new StoryRepository.GetStoryIdsCallback() {
                 @Override
                 public void onPostsLoaded(Integer[] storyIds) {
                     System.out.println("Story ids loaded");
                     isStoryListLoaded = true;
-                    storyManager.getStoryList(new StoryRepository.GetStoryListCallback() {
+                    storyRepository.getStoryList(new StoryRepository.GetStoryListCallback() {
                         @Override
                         public void onPostsLoaded(List<Story> stories) {
                             if (stories == null || stories.isEmpty()) {
-                                view.showErrorMessage("Sorry! HN API only provides up to 500 stories");
+                                view.showErrorMessage("Error loading stories. Maybe you've reached the end?");
                                 return;
                             }
                             view.setRefreshing(false);
                             view.addStories(stories);
                             for (Story parents : stories) {
-                                storyManager.getCommentsList(new StoryRepository.GetCommentsListCallback() {
+                                storyRepository.getCommentsList(new StoryRepository.GetCommentsListCallback() {
                                     @Override
                                     public void onCommentsLoaded(List<Story> comments, Story parent) {
-                                        System.out.println("Cached " + parent.title);
+                                        for (Story comment : comments) {
+                                            if (comment.by != null) {
+                                                if (comment.by.equals(parent.by)) {
+                                                    comment.setIsByOp(true);
+                                                }
+                                            }
+                                        }
                                         if (parent.equals(parentPresenter.getCurrentStory())) {
                                             parentPresenter.setComments(comments);
                                         }
@@ -59,7 +65,7 @@ public class FrontPagePresenter implements FrontPageContract.Presenter {
                 }
             });
         } else {
-            storyManager.getStoryList(new StoryRepository.GetStoryListCallback() {
+            storyRepository.getStoryList(new StoryRepository.GetStoryListCallback() {
                 @Override
                 public void onPostsLoaded(List<Story> stories) {
                     view.setRefreshing(false);
@@ -79,14 +85,15 @@ public class FrontPagePresenter implements FrontPageContract.Presenter {
 
     @Override
     public void resetStoriesLoadedCount() {
-        if (storyManager == null) {
-            storyManager = new StoryManager();
+        if (storyRepository == null) {
+            storyRepository = Injection.provideStoryRepository();
         }
-        storyManager.resetStoriesLoadedCount();
+        storyRepository.resetStoriesLoadedCount();
     }
 
     @Override
     public void openArticle(Story story) {
+        assert story.isStory();
         parentPresenter.openArticle(story);
     }
 

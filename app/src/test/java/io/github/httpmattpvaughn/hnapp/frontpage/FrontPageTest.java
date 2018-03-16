@@ -6,8 +6,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import io.github.httpmattpvaughn.hnapp.MainActivityContract;
+import io.github.httpmattpvaughn.hnapp.MainActivityPresenter;
 import io.github.httpmattpvaughn.hnapp.data.StoryManager;
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
+import io.github.httpmattpvaughn.hnapp.details.DetailsPresenter;
 
 import static org.mockito.Mockito.verify;
 
@@ -25,9 +27,13 @@ public class FrontPageTest {
 
     private FrontPageContract.Presenter presenter;
 
-    @Mock
-    MainActivityContract.Presenter parentPresenter;
+    private MainActivityContract.Presenter parentPresenter;
 
+    @Mock
+    DetailsPresenter detailsPresenter;
+
+    @Mock
+    MainActivityContract.View parentView;
 
     @Before
     public void setUpPresenter() {
@@ -35,8 +41,14 @@ public class FrontPageTest {
         // inject the mocks in the test the initMocks method needs to be called.
         MockitoAnnotations.initMocks(this);
 
+        parentPresenter = new MainActivityPresenter();
+        parentPresenter.attachView(parentView);
+        parentPresenter.addDetailsPresenter(detailsPresenter);
+
         presenter = new FrontPagePresenter(parentPresenter);
         presenter.attachView(view);
+        parentPresenter.addFrontPagePresenter(presenter);
+
     }
 
     @Test
@@ -53,31 +65,24 @@ public class FrontPageTest {
 
     @Test
     public void resetStoriesLoadedCount() {
-
+        storyManager.resetStoriesLoadedCount();
     }
 
+    @Test
+    public void openArticle() {
+        Story fakeStory = StoryManager.getFakeStory();
+        parentPresenter.openArticle(fakeStory);
 
-//    // Gets a list of the next top stories from the Model, passes them to
-//    // the view
-//    void loadStories();
-//
-//    // Removes current stories from view, loads in first 20 stories from web
-//    void reloadStories();
-//
-//    // Resets the tracker on how many stories have been read
-//    void resetStoriesLoadedCount();
-//
-//    // Opens an article to the webview
-//    void openArticle(Story story);
-//
-//    // Give a presenter a reference to the view
-//    void attachView(FrontPageContract.View view);
-//
-//    // Opens article to the comments
-//    void openDiscussion(Story story);
-//
-//    // Remove reference to view
-//    void detachView();
+        verify(parentView).openDetailsPage();
+        verify(detailsPresenter).openArticle(fakeStory);
+    }
 
+    @Test
+    public void openDiscussion() {
+        Story fakeStory = StoryManager.getFakeStory();
+        parentPresenter.openDiscussion(fakeStory);
 
+        verify(parentView).openDetailsPage();
+        verify(detailsPresenter).openDiscussion(fakeStory);
+    }
 }

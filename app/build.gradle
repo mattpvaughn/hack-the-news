@@ -19,6 +19,23 @@ android {
         }
     }
 
+    flavorDimensions "mock"
+
+    // If you need to add more flavors, consider using flavor dimensions.
+    productFlavors {
+        mock {
+            applicationIdSuffix = ".mock"
+        }
+        prod
+    }
+
+    // Always show the result of every unit test, even if it passes.
+    testOptions.unitTests.all {
+        testLogging {
+            events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
+        }
+    }
+
     sourceSets {
         main {
             res.srcDirs = [
@@ -27,6 +44,7 @@ android {
                     'src/main/res/layouts',
                     'src/main/res/'
             ]
+            java.srcDirs = ['src/main/java']
         }
     }
 }
@@ -41,7 +59,6 @@ dependencies {
     implementation 'com.android.support:preference-v7:27.0.2'
     implementation 'com.android.support:preference-v14:27.0.2'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
-
 
     // Dependencies for local unit tests
     testImplementation 'junit:junit:4.12'
@@ -58,7 +75,7 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'com.squareup.retrofit2:converter-gson:2.3.0'
     compile 'com.google.code.gson:gson:2.8.2'
-    compile 'com.klinkerapps:link_builder:1.6.1'
+    compile 'me.saket:better-link-movement-method:2'
     compile 'me.zhanghai.android.materialprogressbar:library:1.4.2'
     implementation project(':multilevelexpindlistview')
 

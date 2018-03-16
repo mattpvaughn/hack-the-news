@@ -3,4 +3,6 @@
     <string name="theme_preference_key">theme</string>
     <string name="theme_preference_title">Theme</string>
     <string name="loading_comments">Loading comments…</string>
+    <string name="url_link">Link</string>
+    <string name="time_icon">Time icon</string>
 </resources>

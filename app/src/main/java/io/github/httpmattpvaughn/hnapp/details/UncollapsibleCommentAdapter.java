@@ -124,9 +124,9 @@ public class UncollapsibleCommentAdapter extends RecyclerView.Adapter {
             } else {
                 this.author.setText("deleted");
             }
-            this.time.setText(Util.beautifyPostAge(comment.time));
+            this.time.setText(Util.beautifyPostAge(comment.time, System.currentTimeMillis() / 1000L));
             if (comment.text != null) {
-                this.text.setText(Util.stringToHtml(comment.text));
+                this.text.setText(Util.stringToHtml(comment.text, this.text, null));
 //                BetterLinkMovementMethod
 //                        .linkify(Linkify.ALL, this.text)
 //                        .setOnLinkClickListener(new BetterLinkMovementMethod.OnLinkClickListener() {

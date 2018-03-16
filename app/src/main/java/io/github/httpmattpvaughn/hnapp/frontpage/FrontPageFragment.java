@@ -145,7 +145,11 @@ public class FrontPageFragment extends Fragment implements FrontPageContract.Vie
     public void onClick(View view) {
         // call openDetailsPage() here...
         Story story = (Story) view.getTag();
-        presenter.openArticle(story);
+        if (story.isStory()) {
+            presenter.openArticle(story);
+        } else {
+            presenter.openDiscussion(story);
+        }
     }
 
     @Override

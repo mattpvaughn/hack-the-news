@@ -3,7 +3,7 @@ package io.github.httpmattpvaughn.hnapp.details;
 import java.util.List;
 
 import io.github.httpmattpvaughn.hnapp.MainActivityContract;
-import io.github.httpmattpvaughn.hnapp.data.StoryManager;
+import io.github.httpmattpvaughn.hnapp.data.Injection;
 import io.github.httpmattpvaughn.hnapp.data.StoryRepository;
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
 
@@ -15,7 +15,7 @@ public class DetailsPresenter implements DetailsContract.Presenter {
 
     private MainActivityContract.Presenter parentPresenter;
     private DetailsContract.View view;
-    private StoryManager storyManager;
+    private StoryRepository storyManager;
     private Story currentStory;
     private boolean isLoading = false;
 
@@ -25,19 +25,15 @@ public class DetailsPresenter implements DetailsContract.Presenter {
 
     @Override
     public void openArticle(Story item) {
+        assert item.isStory();
+
         this.currentStory = item;
         // Show webview part of the detailsView
-        if (item.isStory()) {
-            view.openArticle(item.url);
-            view.loadDiscussion(item);
-            view.showCommentsLoading();
-            view.setArticleViewLock(false);
-            loadComments(item);
-        } else {
-            // the article is not a story (e.g. it's just a text post or something...)
-            openDiscussion(item);
-            view.setArticleViewLock(true);
-        }
+        view.openArticle(item.url);
+        view.loadDiscussion(item);
+        view.showCommentsLoading();
+        view.setArticleViewLock(false);
+        loadComments(item);
     }
 
     @Override
@@ -95,7 +91,7 @@ public class DetailsPresenter implements DetailsContract.Presenter {
     public void loadComments(final Story parentComment) {
         isLoading = true;
         if (storyManager == null) {
-            storyManager = new StoryManager();
+            storyManager = Injection.provideStoryRepository();
         }
 //        Load comments together
         storyManager.getCommentsList(new StoryRepository.GetCommentsListCallback() {

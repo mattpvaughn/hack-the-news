@@ -29,7 +29,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.klinker.android.link_builder.Link;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.List;
@@ -37,6 +36,8 @@ import java.util.List;
 import io.github.httpmattpvaughn.hnapp.R;
 import io.github.httpmattpvaughn.hnapp.Util;
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
+import io.github.httpmattpvaughn.hnapp.views.MyTextView;
+import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 
 import static android.content.Context.CLIPBOARD_SERVICE;
 
@@ -44,9 +45,7 @@ import static android.content.Context.CLIPBOARD_SERVICE;
  * Created by Matt Vaughn: http://mattpvaughn.github.io/
  */
 
-public class DetailsFragment extends Fragment implements DetailsContract.View,
-        Link.OnClickListener,
-        Link.OnLongClickListener {
+public class DetailsFragment extends Fragment implements DetailsContract.View, MyTextView.OnLinkClickListener, BetterLinkMovementMethod.OnLinkLongClickListener {
 
     private DetailsContract.Presenter presenter;
     private WebView webView;
@@ -205,6 +204,7 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
         if (slidingUpPanel.getPanelState() != SlidingUpPanelLayout.PanelState.EXPANDED) {
             slidingUpPanel.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
+        setUpWebView();
         this.webView.loadUrl(url);
         updateWebViewControls();
 
@@ -280,6 +280,7 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
         this.commentAdapter = new CommentAdapter(this, this, new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                System.out.println("DEBUG: toggle comment collapse!");
                 int position = commentsRecyclerView.getChildLayoutPosition(view);
                 commentAdapter.toggleGroup(position);
             }
@@ -299,15 +300,15 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
         TextView title = getView().findViewById(R.id.title);
         title.setText(story.title);
         TextView url = getView().findViewById(R.id.url);
-        url.setText(Util.beautifyUrl(story.url));
+        url.setText(Util.shortifyUrl(story.url));
         TextView time = getView().findViewById(R.id.time);
-        time.setText(Util.beautifyPostAge(story.time));
+        time.setText(Util.beautifyPostAge(story.time, System.currentTimeMillis() / 1000L));
         TextView comments = getView().findViewById(R.id.comments);
         comments.setText(String.valueOf(story.descendants));
 
         if (story.text != null) {
             TextView content = getView().findViewById(R.id.text_content);
-            content.setText(Util.stringToHtml(story.text));
+            content.setText(Util.stringToHtml(story.text, content, null));
             content.setVisibility(View.VISIBLE);
         } else {
             TextView content = getView().findViewById(R.id.text_content);
@@ -362,17 +363,18 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
     }
 
     @Override
-    public void onClick(String clickedText) {
-        presenter.openLink(clickedText);
-    }
-
-    @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
     }
 
     @Override
-    public void onLongClick(final String clickedText) {
+    public void onClickLink(TextView textView, String url) {
+        System.out.println("BADA BOOM");
+        presenter.openLink(url);
+    }
+
+    @Override
+    public boolean onLongClick(TextView textView, final String url) {
         final CharSequence[] actions = new CharSequence[]{
                 "Open in browser",
                 "Share",
@@ -385,19 +387,19 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
                         String action = (String) actions[which];
                         switch (action) {
                             case "Open in browser":
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(clickedText));
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                                 startActivity(browserIntent);
                                 break;
                             case "Share":
                                 Intent sendIntent = new Intent();
                                 sendIntent.setAction(Intent.ACTION_SEND);
-                                sendIntent.putExtra(Intent.EXTRA_TEXT, clickedText);
+                                sendIntent.putExtra(Intent.EXTRA_TEXT, url);
                                 sendIntent.setType("text/plain");
                                 startActivity(sendIntent);
                                 break;
                             case "Copy":
                                 ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(CLIPBOARD_SERVICE);
-                                ClipData clip = ClipData.newPlainText("URL", clickedText);
+                                ClipData clip = ClipData.newPlainText("URL", url);
                                 clipboard.setPrimaryClip(clip);
                                 Toast.makeText(getContext(), "Text copied to clipboard", Toast.LENGTH_SHORT).show();
                                 break;
@@ -413,5 +415,6 @@ public class DetailsFragment extends Fragment implements DetailsContract.View,
                 .setTitle("Actions")
                 .create()
                 .show();
+        return true;
     }
 }

@@ -102,17 +102,20 @@ public class StoryAdapter extends RecyclerView.Adapter<StoryAdapter.ViewHolder> 
                 theme.resolveAttribute(R.attr.rowTextColorPrimary, typedValue, true);
                 this.score.setTextColor(typedValue.data);
             }
-            // Don't show link icon is story is not a link
-            if (story.isStory() && url == null) {
-                this.urlDrawable.setImageResource(R.drawable.ic_text_fields_black_24dp);
-                TypedValue typedValue = new TypedValue();
-                theme.resolveAttribute(R.attr.rowDrawableColor, typedValue, true);
-                this.urlDrawable.getDrawable().setColorFilter(typedValue.data, PorterDuff.Mode.MULTIPLY);
+            // Don't show link icon if story is not a link
+            if (!story.isStory()) {
+                this.urlDrawable.setImageResource(R.drawable.ic_text_fields_light_grey_24dp);
+            } else {
+                this.urlDrawable.setImageResource(R.drawable.ic_link_light_grey_24dp);
             }
+            TypedValue typedValue = new TypedValue();
+            theme.resolveAttribute(R.attr.rowDrawableColor, typedValue, true);
+            this.urlDrawable.getDrawable().setColorFilter(typedValue.data, PorterDuff.Mode.MULTIPLY);
+
             this.author.setText(story.by);
-            this.url.setText(Util.beautifyUrl(story.url));
+            this.url.setText(Util.shortifyUrl(story.url));
             this.title.setText(story.title);
-            this.time.setText(Util.beautifyPostAge(story.time));
+            this.time.setText(Util.beautifyPostAge(story.time, System.currentTimeMillis() / 1000L));
             this.comments.setText(String.valueOf(story.descendants));
             // Set the tag of the story_item view to url so we can handle
             // onclick in FrontPageFragment

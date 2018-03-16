@@ -23,6 +23,8 @@ public class Story implements MultiLevelExpIndListAdapter.ExpIndData {
     public int descendants;
     public int parent;
     public int depth;
+    // True if a comment is by the original poster of the story
+    public boolean isByOp;
 
     // "job", "story", "comment", "poll", or "pollopt"
     private String TYPE_STORY = "story";
@@ -49,6 +51,14 @@ public class Story implements MultiLevelExpIndListAdapter.ExpIndData {
 //                ", parent=" + parent +
 //                ", depth=" + depth +
 //                '}';
+    }
+
+    public boolean isByOp() {
+        return isByOp;
+    }
+
+    public void setIsByOp(boolean isByOp) {
+        this.isByOp = isByOp;
     }
 
     public Story copy() {
@@ -115,6 +125,6 @@ public class Story implements MultiLevelExpIndListAdapter.ExpIndData {
     }
 
     public boolean isStory() {
-        return type.equals(TYPE_STORY);
+        return url != null;
     }
 }

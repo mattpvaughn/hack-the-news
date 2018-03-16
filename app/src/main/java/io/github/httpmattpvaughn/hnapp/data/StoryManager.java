@@ -39,6 +39,7 @@ public class StoryManager implements StoryRepository {
             @Override
             public void onFailure(@NonNull Call<Integer[]> call, @NonNull Throwable t) {
                 Log.e("HNapp", "Error loading story list.");
+                callback.onPostsLoaded(null);
             }
         });
     }
@@ -46,6 +47,9 @@ public class StoryManager implements StoryRepository {
     @Override
     public void getStoryList(@NonNull final GetStoryListCallback callback) {
         final List<Story> storyList = new ArrayList<>();
+        if (storyIdArr == null) {
+            return;
+        }
         for (int i = storiesLoaded; i < storiesLoaded + STORIES_PER_PAGE; i++) {
             if (i > storyIdArr.length) {
                 callback.onPostsLoaded(new ArrayList<Story>());
@@ -261,12 +265,8 @@ public class StoryManager implements StoryRepository {
             parentIds.remove(position);
             parentIds.add(parentId);
 
-            System.out.println("Comment gotten from cache!");
-
             return thread;
         }
-
-
     }
 
 }
