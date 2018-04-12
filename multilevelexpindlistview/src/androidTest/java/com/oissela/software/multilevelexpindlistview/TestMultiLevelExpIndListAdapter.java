@@ -159,7 +159,7 @@ public class TestMultiLevelExpIndListAdapter extends AndroidTestCase {
         return data;
     }
 
-    public static class MockAdapter extends MultiLevelExpIndListAdapter<RecyclerView.ViewHolder> {
+    public static class MockAdapter extends MultiLevelExpIndListAdapter {
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
             return null;

@@ -38,8 +38,6 @@ public interface DetailsContract {
         void hideCommentsLoading();
 
         void setArticleViewLock(boolean isLocked);
-
-        void addFakeComments(List<Story> comments, List<Story> parents);
     }
 
     // the *presenter* part of model-view-presenter

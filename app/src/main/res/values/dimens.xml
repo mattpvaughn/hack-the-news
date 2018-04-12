@@ -11,6 +11,15 @@
     <dimen name="row_horizontal_padding">16dp</dimen>
     <dimen name="text_item_separation">8dp</dimen>
     <dimen name="text_item_separation_small">4dp</dimen>
+    <dimen name="title_size">16sp</dimen>
+
+    <!-- Story item condensed -->
+    <dimen name="dense_row_vertical_padding">4dp</dimen>
+    <dimen name="dense_row_horizontal_padding">16dp</dimen>
+    <dimen name="dense_text_item_separation">4dp</dimen>
+    <dimen name="dense_text_item_separation_small">4dp</dimen>
+    <dimen name="dense_title_size">14sp</dimen>
+
 
     <dimen name="depth_marker_width">4dp</dimen>
 

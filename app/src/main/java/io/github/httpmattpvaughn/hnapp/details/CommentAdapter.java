@@ -1,8 +1,10 @@
 package io.github.httpmattpvaughn.hnapp.details;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +15,7 @@ import com.oissela.software.multilevelexpindlistview.MultiLevelExpIndListAdapter
 import io.github.httpmattpvaughn.hnapp.R;
 import io.github.httpmattpvaughn.hnapp.Util;
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
-import io.github.httpmattpvaughn.hnapp.views.MyTextView;
-import me.saket.bettermovementmethod.BetterLinkMovementMethod;
+import io.github.httpmattpvaughn.hnapp.views.TextViewLinkHandler;
 
 /**
  * Created by Matt Vaughn: http://mattpvaughn.github.io/
@@ -23,7 +24,7 @@ import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 public class CommentAdapter extends MultiLevelExpIndListAdapter {
 
     private final View.OnClickListener onClickListener;
-    private final BetterLinkMovementMethod.OnLinkLongClickListener onLinkLongClickListener;
+    private final TextViewLinkHandler.OnLinkLongClickListener onLinkLongClickListener;
     private int[] colorDepthArr = new int[]{
             0xFFFFEB3B,
             0xFFFFC107,
@@ -33,10 +34,10 @@ public class CommentAdapter extends MultiLevelExpIndListAdapter {
             0xFF673AB7,
             0xFF3F51B5
     };
-    private MyTextView.OnLinkClickListener onLinkClickListener;
+    private TextViewLinkHandler.OnLinkClickListener onLinkClickListener;
 
-    public CommentAdapter(MyTextView.OnLinkClickListener onLinkClickListener,
-                          BetterLinkMovementMethod.OnLinkLongClickListener onLinkLongClickListener,
+    public CommentAdapter(TextViewLinkHandler.OnLinkClickListener onLinkClickListener,
+                          TextViewLinkHandler.OnLinkLongClickListener onLinkLongClickListener,
                           View.OnClickListener onClickListener) {
         this.onLinkClickListener = onLinkClickListener;
         this.onLinkLongClickListener = onLinkLongClickListener;
@@ -99,7 +100,7 @@ public class CommentAdapter extends MultiLevelExpIndListAdapter {
             }
             this.time.setText(Util.beautifyPostAge(comment.time, System.currentTimeMillis() / 1000L));
             if (comment.text != null) {
-                this.text.setText(Util.stringToHtml(comment.text, this.text, onLinkClickListener));
+                this.text.setText(Util.stringToHtml(comment.text));
             } else {
                 this.text.setText("[Deleted]");
             }
@@ -117,15 +118,25 @@ public class CommentAdapter extends MultiLevelExpIndListAdapter {
             if (comment.isByOp()) {
                 this.author.setTextColor(this.root.getResources().getColor(R.color.light_theme_color_primary));
                 this.author.setText(String.format("%s (OP)", this.author.getText()));
+            } else {
+                TypedValue typedValue = new TypedValue();
+                Resources.Theme theme = this.root.getContext().getTheme();
+                theme.resolveAttribute(R.attr.rowTextColorPrimary, typedValue, true);
+                this.author.setTextColor(typedValue.data);
             }
 
             // Set marker color depending on depth
             this.depthMarker.setBackgroundColor(colorDepthArr[comment.depth % colorDepthArr.length]);
 
-            this.text.setOnClickListener(new View.OnClickListener() {
+            this.text.setMovementMethod(new TextViewLinkHandler() {
                 @Override
-                public void onClick(View v) {
-                    root.callOnClick();
+                public void onLinkClick(String url) {
+                    onLinkClickListener.onClickLink(text, url);
+                }
+
+                @Override
+                public void onLinkLongClick(String url) {
+                    onLinkLongClickListener.onLongClickLink(text, url);
                 }
             });
             this.root.setOnClickListener(onClickListener);

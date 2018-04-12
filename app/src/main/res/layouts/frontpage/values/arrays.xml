@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Settings -->
     <string-array name="themes_list_preference">
         <item>Light</item>
         <item>Dark</item>
@@ -10,5 +11,15 @@
         <item>light</item>
         <item>dark</item>
         <item>black</item>
+    </string-array>
+
+    <string-array name="density_list_preference">
+        <item>Normal</item>
+        <item>Dense</item>
+    </string-array>
+
+    <string-array name="density_key_preference">
+        <item>@string/normal_story_item_key</item>
+        <item>@string/dense_story_item_key</item>
     </string-array>
 </resources>

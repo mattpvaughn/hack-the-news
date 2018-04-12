@@ -12,20 +12,20 @@ import java.util.List;
  * Initially all elements in the list are single items. When you want to collapse an item and all its
  * descendants call {@link #collapseGroup(int)}. When you want to exapand a group call {@link #expandGroup(int)}.
  * Note that groups inside other groups are kept collapsed.
- *
+ * <p>
  * To collapse an item and all its descendants or expand a group at a certain position
  * you can call {@link #toggleGroup(int)}.
- *
+ * <p>
  * To preserve state (i.e. which items are collapsed) when a configuration change happens (e.g. screen rotation)
  * you should call {@link #saveGroups()} inside onSaveInstanceState and save the returned value into
  * the Bundle. When the activity/fragment is recreated you can call {@link #restoreGroups(java.util.List)}
  * to restore the previous state. The actual data (e.g. the comments in the sample app) is not preserved,
  * so you should save it yourself with a static field or implementing Parcelable or using setRetainInstance(true)
  * or saving data to a file or something like that.
- *
+ * <p>
  * To see an example of how to extend this abstract class see MyAdapter.java in sampleapp.
  */
-public abstract class MultiLevelExpIndListAdapter<V extends RecyclerView.ViewHolder> extends RecyclerView.Adapter {
+public abstract class MultiLevelExpIndListAdapter extends RecyclerView.Adapter {
     /**
      * Indicates whether or not the observers must be notified whenever
      * {@link #mData} is modified.
@@ -69,52 +69,30 @@ public abstract class MultiLevelExpIndListAdapter<V extends RecyclerView.ViewHol
         /**
          * @param groupSize Set the number of items in the group.
          *                  Note: groups contained in other groups are counted just as one, not
-         *                        as the number of items that they contain.
+         *                  as the number of items that they contain.
          */
         void setGroupSize(int groupSize);
-
-        /** Note: actually this method is never called in MultiLevelExpIndListAdapter,
-         * that's why it's not strictly required that you implement this function and so
-         * it's commented out.
-         * @return The number of items in the group.
-         *         Note: groups contained in other groups are counted just as one, not
-         *               as the number of items that they contain.
-         */
-        //int getGroupSize();
-
-        /** Note: actually this method is never called in MultiLevelExpIndListAdapter,
-         * that's why it's not strictly required that you implement this function and so
-         * it's commented out.
-         * @return The level of indentation in the range [0, n-1]
-         */
-        //int getIndentation();
-
-        /** Note: actually this method is never called in MultiLevelExpIndListAdapter,
-         * that's why it's not strictly required that you implement this function and so
-         * it's commented out.
-         * @param indentation The level of indentation in the range [0, n-1]
-         */
-        //int setIndentation(int indentation);
     }
 
     public MultiLevelExpIndListAdapter() {
-        mData = new ArrayList<ExpIndData>();
-        mGroups = new HashMap<ExpIndData, List<? extends ExpIndData>>();
+        mData = new ArrayList<>();
+        mGroups = new HashMap<>();
         mNotifyOnChange = true;
     }
 
     public void add(ExpIndData item) {
-        System.out.println();
         if (item != null) {
             mData.add(item);
+            int position = mData.size() - 1;
             if (mNotifyOnChange)
-                notifyItemChanged(mData.size() - 1);
+                notifyItemChanged(position);
         }
     }
 
     public void addAll(int position, Collection<? extends ExpIndData> data) {
         if (data != null && data.size() > 0) {
             mData.addAll(position, data);
+            int count = 0;
             if (mNotifyOnChange)
                 notifyItemRangeInserted(position, data.size());
         }
@@ -146,6 +124,7 @@ public abstract class MultiLevelExpIndListAdapter<V extends RecyclerView.ViewHol
     /**
      * Remove an item or group.If it's a group it removes also all the
      * items and groups that it contains.
+     *
      * @param item The item or group to be removed.
      * @return true if this adapter was modified by this operation, false otherwise.
      */
@@ -157,7 +136,8 @@ public abstract class MultiLevelExpIndListAdapter<V extends RecyclerView.ViewHol
      * Remove an item or group. If it's a group it removes also all the
      * items and groups that it contains if expandGroupBeforeRemoval is false.
      * If it's true the group is expanded and then only the item is removed.
-     * @param item The item or group to be removed.
+     *
+     * @param item                     The item or group to be removed.
      * @param expandGroupBeforeRemoval True to expand the group before removing the item.
      *                                 False to remove also all the items and groups contained if
      *                                 the item to be removed is a group.
@@ -169,12 +149,14 @@ public abstract class MultiLevelExpIndListAdapter<V extends RecyclerView.ViewHol
         if (item != null && (index = mData.indexOf(item)) != -1) {
             if ((removed = mData.remove(item))) {
                 if (mGroups.containsKey(item)) {
-                    if (expandGroupBeforeRemoval)
+                    if (expandGroupBeforeRemoval) {
                         expandGroup(index);
+                    }
                     mGroups.remove(item);
                 }
-                if (mNotifyOnChange)
+                if (mNotifyOnChange) {
                     notifyItemRemoved(index);
+                }
             }
         }
         return removed;
@@ -191,6 +173,7 @@ public abstract class MultiLevelExpIndListAdapter<V extends RecyclerView.ViewHol
 
     /**
      * Expand the group at position "posititon".
+     *
      * @param position The position (range [0,n-1]) of the group that has to be expanded
      */
     public void expandGroup(int position) {
@@ -216,15 +199,18 @@ public abstract class MultiLevelExpIndListAdapter<V extends RecyclerView.ViewHol
 
     /**
      * Collapse the descendants of the item at position "position".
+     *
      * @param position The position (range [0,n-1]) of the element that has to be collapsed
      */
     public void collapseGroup(int position) {
         ExpIndData firstItem = getItemAt(position);
 
-        if (firstItem.getChildren() == null || firstItem.getChildren().isEmpty())
-            return;
+        System.out.println(firstItem);
 
-        System.out.println(firstItem.getChildren().size());
+        if (firstItem.getChildren() == null || firstItem.getChildren().isEmpty()) {
+            System.out.println("Yello?");
+            return;
+        }
 
         // group containing all the descendants of firstItem
         List<ExpIndData> group = new ArrayList<ExpIndData>();
@@ -232,8 +218,9 @@ public abstract class MultiLevelExpIndListAdapter<V extends RecyclerView.ViewHol
         List<ExpIndData> stack = new ArrayList<ExpIndData>();
         int groupSize = 0;
 
-        for (int i = firstItem.getChildren().size() - 1; i >= 0; i--)
+        for (int i = firstItem.getChildren().size() - 1; i >= 0; i--) {
             stack.add(firstItem.getChildren().get(i));
+        }
 
         while (!stack.isEmpty()) {
             ExpIndData item = stack.remove(stack.size() - 1);
@@ -258,10 +245,12 @@ public abstract class MultiLevelExpIndListAdapter<V extends RecyclerView.ViewHol
 
     /**
      * Collpase/expand the item at position "position"
+     *
      * @param position The position (range [0,n-1]) of the element that has to be collapsed/expanded
      */
     public void toggleGroup(int position) {
-        if (getItemAt(position).isGroup()){
+        System.out.println("Togglegroup");
+        if (getItemAt(position).isGroup()) {
             expandGroup(position);
         } else {
             collapseGroup(position);
@@ -272,12 +261,13 @@ public abstract class MultiLevelExpIndListAdapter<V extends RecyclerView.ViewHol
      * In onSaveInstanceState, you should save the groups' indices returned by this function
      * in the Bundle so that later they can be restored using {@link #restoreGroups(java.util.List)}.
      * saveGroups() expand all the groups so you should call this function only inside onSaveInstanceState.
+     *
      * @return A list of indices of items that are groups.
      */
     public ArrayList<Integer> saveGroups() {
         boolean notify = mNotifyOnChange;
         mNotifyOnChange = false;
-        ArrayList<Integer> groupsIndices = new ArrayList<Integer>();
+        ArrayList<Integer> groupsIndices = new ArrayList<>();
         for (int i = 0; i < mData.size(); i++) {
             if (mData.get(i).isGroup()) {
                 expandGroup(i);
@@ -291,6 +281,7 @@ public abstract class MultiLevelExpIndListAdapter<V extends RecyclerView.ViewHol
     /**
      * Call this function to restore the groups that were collapsed before the configuration change
      * happened (e.g. screen rotation). See {@link #saveGroups()}.
+     *
      * @param groupsNum The list of indices of items that are groups and should be collapsed.
      */
     public void restoreGroups(List<Integer> groupsNum) {

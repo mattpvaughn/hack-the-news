@@ -8,5 +8,11 @@
             android:dialogTitle="@string/theme_preference_title"
             android:entries="@array/themes_list_preference"
             android:entryValues="@array/themes_key_preference" />
+        <ListPreference
+            android:key="@string/density_preference_key"
+            android:title="@string/density_preference_title"
+            android:dialogTitle="@string/density_preference_title"
+            android:entries="@array/density_list_preference"
+            android:entryValues="@array/density_key_preference"/>
     </PreferenceCategory>
 </PreferenceScreen>

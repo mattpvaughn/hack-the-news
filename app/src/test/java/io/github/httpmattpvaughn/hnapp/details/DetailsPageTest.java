@@ -9,7 +9,7 @@ import java.util.List;
 
 import io.github.httpmattpvaughn.hnapp.MainActivityContract;
 import io.github.httpmattpvaughn.hnapp.MainActivityPresenter;
-import io.github.httpmattpvaughn.hnapp.data.StoryManager;
+import io.github.httpmattpvaughn.hnapp.data.StoryManagerMock;
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
 
 import static org.mockito.Mockito.verify;
@@ -47,7 +47,7 @@ public class DetailsPageTest {
 
     @Test
     public void openArticle() {
-        Story fakeStory = StoryManager.getFakeStory();
+        Story fakeStory = StoryManagerMock.getFakeStory();
         presenter.openArticle(fakeStory);
 
         verify(view).openArticle(fakeStory.url);
@@ -59,7 +59,7 @@ public class DetailsPageTest {
 
     @Test
     public void openLink() {
-        Story fakeStory = StoryManager.getFakeStory();
+        Story fakeStory = StoryManagerMock.getFakeStory();
         presenter.openLink(fakeStory.url);
 
         verify(view).openArticle(fakeStory.url);
@@ -67,7 +67,7 @@ public class DetailsPageTest {
 
     @Test
     public void openDiscussion() {
-        Story fakeStory = StoryManager.getFakeStory();
+        Story fakeStory = StoryManagerMock.getFakeStory();
         fakeStory.type = "-1";
         presenter.openDiscussion(fakeStory);
 
@@ -85,10 +85,9 @@ public class DetailsPageTest {
         verify(parentPresenter).closeDetailsPage();
     }
 
-    // TODO- inject StoryManager so we can test it!
     @Test
     public void loadComments() {
-        Story fakeStory = StoryManager.getFakeStory();
+        Story fakeStory = StoryManagerMock.getFakeStory();
         presenter.loadComments(fakeStory);
 
         verify(parentPresenter).closeDetailsPage();
@@ -96,7 +95,7 @@ public class DetailsPageTest {
 
     @Test
     public void setComments() {
-        List<Story> fakeStoryList = StoryManager.getFakeStoryList();
+        List<Story> fakeStoryList = StoryManagerMock.getFakeStoryList();
         presenter.setComments(fakeStoryList);
 
         verify(view).addComments(fakeStoryList);

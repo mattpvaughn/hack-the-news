@@ -36,8 +36,7 @@ import java.util.List;
 import io.github.httpmattpvaughn.hnapp.R;
 import io.github.httpmattpvaughn.hnapp.Util;
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
-import io.github.httpmattpvaughn.hnapp.views.MyTextView;
-import me.saket.bettermovementmethod.BetterLinkMovementMethod;
+import io.github.httpmattpvaughn.hnapp.views.TextViewLinkHandler;
 
 import static android.content.Context.CLIPBOARD_SERVICE;
 
@@ -45,7 +44,7 @@ import static android.content.Context.CLIPBOARD_SERVICE;
  * Created by Matt Vaughn: http://mattpvaughn.github.io/
  */
 
-public class DetailsFragment extends Fragment implements DetailsContract.View, MyTextView.OnLinkClickListener, BetterLinkMovementMethod.OnLinkLongClickListener {
+public class DetailsFragment extends Fragment implements DetailsContract.View, TextViewLinkHandler.OnLinkClickListener, TextViewLinkHandler.OnLinkLongClickListener {
 
     private DetailsContract.Presenter presenter;
     private WebView webView;
@@ -266,12 +265,6 @@ public class DetailsFragment extends Fragment implements DetailsContract.View, M
         slidingUpPanel.setTouchEnabled(!isLocked);
     }
 
-    @Override
-    public void addFakeComments(List<Story> comments, List<Story> parents) {
-//        ((UncollapsibleCommentAdapter)commentAdapter).setComments(comments, parents);
-    }
-
-
     // Set the preferred items from discussion page to match data stored in
     // item object
     @Override
@@ -285,13 +278,6 @@ public class DetailsFragment extends Fragment implements DetailsContract.View, M
                 commentAdapter.toggleGroup(position);
             }
         });
-//        Loading in fake comments for debugging- will eventually refactor to an if(DEBUG)
-//        this.commentAdapter = new UncollapsibleCommentAdapter();
-//        List<Story> data = new ArrayList<Story>();
-//        int FAKE_CHILDREN_PER_LEVEL = 300;
-//        for(int i = 0; i < 300; i++) {
-//            data.add(new Story());
-//        }
         this.commentsRecyclerView.setAdapter(commentAdapter);
         TextView score = getView().findViewById(R.id.score);
         score.setText(String.valueOf(story.score));
@@ -308,7 +294,7 @@ public class DetailsFragment extends Fragment implements DetailsContract.View, M
 
         if (story.text != null) {
             TextView content = getView().findViewById(R.id.text_content);
-            content.setText(Util.stringToHtml(story.text, content, null));
+            content.setText(Util.stringToHtml(story.text));
             content.setVisibility(View.VISIBLE);
         } else {
             TextView content = getView().findViewById(R.id.text_content);
@@ -374,7 +360,7 @@ public class DetailsFragment extends Fragment implements DetailsContract.View, M
     }
 
     @Override
-    public boolean onLongClick(TextView textView, final String url) {
+    public void onLongClickLink(TextView textView, final String url) {
         final CharSequence[] actions = new CharSequence[]{
                 "Open in browser",
                 "Share",
@@ -415,6 +401,5 @@ public class DetailsFragment extends Fragment implements DetailsContract.View, M
                 .setTitle("Actions")
                 .create()
                 .show();
-        return true;
     }
 }

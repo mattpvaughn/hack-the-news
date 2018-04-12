@@ -1,6 +1,10 @@
 package io.github.httpmattpvaughn.hnapp.frontpage;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -10,6 +14,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,6 +31,8 @@ import java.util.List;
 import io.github.httpmattpvaughn.hnapp.R;
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
 import io.github.httpmattpvaughn.hnapp.settings.SettingsActivity;
+
+import static android.content.Context.CLIPBOARD_SERVICE;
 
 /**
  * Created by Matt Vaughn: http://mattpvaughn.github.io/
@@ -156,5 +163,52 @@ public class FrontPageFragment extends Fragment implements FrontPageContract.Vie
     public void onClickComment(View view) {
         Story story = (Story) view.getTag();
         presenter.openDiscussion(story);
+    }
+
+    @Override
+    public void onLongClick(View view) {
+        // open up a dialog with options
+        final CharSequence[] actions = new CharSequence[]{
+                "Open in browser",
+                "Share",
+                "Copy link"
+        };
+        final Story story = (Story) view.getTag();
+        final String url = story.url;
+        AlertDialog.OnClickListener listener =
+                new AlertDialog.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String action = (String) actions[which];
+                        switch (action) {
+                            case "Open in browser":
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                                startActivity(browserIntent);
+                                break;
+                            case "Share":
+                                Intent sendIntent = new Intent();
+                                sendIntent.setAction(Intent.ACTION_SEND);
+                                sendIntent.putExtra(Intent.EXTRA_TEXT, url);
+                                sendIntent.setType("text/plain");
+                                startActivity(sendIntent);
+                                break;
+                            case "Copy":
+                                ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(CLIPBOARD_SERVICE);
+                                ClipData clip = ClipData.newPlainText("URL", url);
+                                clipboard.setPrimaryClip(clip);
+                                Toast.makeText(getContext(), "Text copied to clipboard", Toast.LENGTH_SHORT).show();
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                };
+        new AlertDialog.Builder(getContext())
+                .setItems(actions, listener)
+                .setCancelable(true)
+                .setNegativeButton("Cancel", null)
+                .setTitle("Actions")
+                .create()
+                .show();
     }
 }

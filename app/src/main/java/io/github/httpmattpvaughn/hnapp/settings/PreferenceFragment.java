@@ -33,7 +33,9 @@ public class PreferenceFragment extends PreferenceFragmentCompat implements Shar
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getContext().getString(R.string.theme_preference_key))) {
-            getActivity().recreate();
+            if (getActivity() != null) {
+                getActivity().recreate();
+            }
         }
     }
 }

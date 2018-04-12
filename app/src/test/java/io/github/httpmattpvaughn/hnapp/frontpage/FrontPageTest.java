@@ -8,6 +8,7 @@ import org.mockito.MockitoAnnotations;
 import io.github.httpmattpvaughn.hnapp.MainActivityContract;
 import io.github.httpmattpvaughn.hnapp.MainActivityPresenter;
 import io.github.httpmattpvaughn.hnapp.data.StoryManager;
+import io.github.httpmattpvaughn.hnapp.data.StoryManagerMock;
 import io.github.httpmattpvaughn.hnapp.data.model.Story;
 import io.github.httpmattpvaughn.hnapp.details.DetailsPresenter;
 
@@ -70,7 +71,7 @@ public class FrontPageTest {
 
     @Test
     public void openArticle() {
-        Story fakeStory = StoryManager.getFakeStory();
+        Story fakeStory = StoryManagerMock.getFakeStory();
         parentPresenter.openArticle(fakeStory);
 
         verify(parentView).openDetailsPage();
@@ -79,7 +80,7 @@ public class FrontPageTest {
 
     @Test
     public void openDiscussion() {
-        Story fakeStory = StoryManager.getFakeStory();
+        Story fakeStory = StoryManagerMock.getFakeStory();
         parentPresenter.openDiscussion(fakeStory);
 
         verify(parentView).openDetailsPage();

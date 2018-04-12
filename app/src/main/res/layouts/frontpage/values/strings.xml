@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Settings -->
     <string name="theme_preference_key">theme</string>
     <string name="theme_preference_title">Theme</string>
+    <string name="density_preference_key">story_density</string>
+    <string name="density_preference_title">Story density</string>
+    <string name="normal_story_item_key">normal</string>
+    <string name="dense_story_item_key">dense</string>
+
+
     <string name="loading_comments">Loading comments…</string>
     <string name="url_link">Link</string>
     <string name="time_icon">Time icon</string>

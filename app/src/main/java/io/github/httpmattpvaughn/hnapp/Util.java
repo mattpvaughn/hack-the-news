@@ -4,16 +4,9 @@ import android.content.Context;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.text.Html;
-import android.text.SpannableStringBuilder;
-import android.text.style.ClickableSpan;
-import android.text.style.URLSpan;
-import android.view.View;
-import android.widget.TextView;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import io.github.httpmattpvaughn.hnapp.views.MyTextView;
 
 /**
  * Created by Matt Vaughn: http://mattpvaughn.github.io/
@@ -103,9 +96,7 @@ public class Util {
     // have longpressability on links, and be able to open handle links manually
 
     // formats html string to a "Spanned" object for use in textview
-    public static CharSequence stringToHtml(String string,
-                                            TextView textView,
-                                            MyTextView.OnLinkClickListener listener) {
+    public static CharSequence stringToHtml(String string) {
         if (string == null) {
             return null;
         }
@@ -117,32 +108,7 @@ public class Util {
             spanned = Html.fromHtml(string);
         }
 
-        SpannableStringBuilder strBuilder = new SpannableStringBuilder(spanned);
-        URLSpan[] urls = strBuilder.getSpans(0, spanned.length(), URLSpan.class);
-        for (URLSpan span : urls) {
-            makeLinkClickable(strBuilder, span, textView, listener);
-        }
-
-        textView.setLinksClickable(true);
-
         return spanned;
-    }
-
-    protected static void makeLinkClickable(SpannableStringBuilder strBuilder,
-                                            final URLSpan span,
-                                            final TextView textView,
-                                            final MyTextView.OnLinkClickListener listener) {
-        int start = strBuilder.getSpanStart(span);
-        int end = strBuilder.getSpanEnd(span);
-        int flags = strBuilder.getSpanFlags(span);
-        ClickableSpan clickable = new ClickableSpan() {
-            @Override
-            public void onClick(View widget) {
-                listener.onClickLink(textView, span.getURL());
-            }
-        };
-        strBuilder.setSpan(clickable, start, end, flags);
-        strBuilder.removeSpan(span);
     }
 
     // Sets the theme of an activity using sharedprefs

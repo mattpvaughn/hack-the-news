@@ -3,6 +3,7 @@ package io.github.httpmattpvaughn.hnapp.frontpage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
+import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
@@ -51,7 +52,14 @@ public class StoryAdapter extends RecyclerView.Adapter<StoryAdapter.ViewHolder> 
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
 
-        View storyItem = inflater.inflate(R.layout.story_item, parent, false);
+
+        String density = PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(context.getString(R.string.density_preference_key), null);
+        int layout = R.layout.story_item;
+        if (density != null && density.equals(context.getString(R.string.dense_story_item_key))) {
+            layout = R.layout.story_item_dense;
+        }
+        View storyItem = inflater.inflate(layout, parent, false);
 
         return new ViewHolder(storyItem);
     }
@@ -120,6 +128,13 @@ public class StoryAdapter extends RecyclerView.Adapter<StoryAdapter.ViewHolder> 
             // Set the tag of the story_item view to url so we can handle
             // onclick in FrontPageFragment
             this.root.setTag(story);
+            this.root.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    storyClickListener.onLongClick(root);
+                    return false;
+                }
+            }); // open up sharing/link copying options for story
             this.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

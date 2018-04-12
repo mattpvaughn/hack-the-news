@@ -25,6 +25,13 @@
             android:textColor="?attr/rowTextColorPrimary"
             tools:text="Example text"/>
 
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/divider_size"
+            android:layout_marginTop="@dimen/row_vertical_padding"
+            android:background="?attr/rowDividerColor"/>
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/comment_recyclerview"
             android:layout_width="match_parent"

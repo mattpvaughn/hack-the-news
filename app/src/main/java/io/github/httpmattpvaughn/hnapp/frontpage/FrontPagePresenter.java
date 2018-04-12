@@ -73,7 +73,6 @@ public class FrontPagePresenter implements FrontPageContract.Presenter {
                 }
             });
         }
-
     }
 
     @Override

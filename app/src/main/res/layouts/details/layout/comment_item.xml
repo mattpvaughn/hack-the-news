@@ -62,10 +62,12 @@
         tools:text="6"
         tools:visibility="visible"/>
 
-    <io.github.httpmattpvaughn.hnapp.views.MyTextView
+    <TextView
         android:id="@+id/text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:clickable="false"
+        android:focusable="false"
         android:paddingEnd="@dimen/row_horizontal_padding"
         android:paddingLeft="@dimen/row_horizontal_padding"
         android:paddingRight="@dimen/row_horizontal_padding"
@@ -73,7 +75,6 @@
         android:paddingTop="@dimen/row_vertical_padding"
         android:textColor="?attr/rowTextColorPrimary"
         android:textSize="13sp"
-        android:textIsSelectable="true"
         app:layout_constraintStart_toEndOf="@id/depth_marker"
         app:layout_constraintTop_toBottomOf="@+id/author"
         tools:text="Text comment please ignore. Text comment please ignore. Text comment please ignore. Text comment please ignore. Text comment please ignore. Text comment please ignore. "/>
