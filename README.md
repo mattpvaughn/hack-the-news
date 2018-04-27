@@ -8,7 +8,4 @@ A personal project I started to get a grasp on MVP and testing for Android.
 
 Screenshots: 
 
-![Theme demo](screenshots/screenshot1.png)
-![Material design](screenshots/screenshot2.png)
-![Easy browsing](screenshots/screenshot3.png)
-![Easy reading](screenshots/screenshot4.png)
+![Screenshots](screenshots/mega_screenshot.png)
